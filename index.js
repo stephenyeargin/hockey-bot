@@ -1,4 +1,5 @@
 import process from 'node:process';
+import fs from 'node:fs';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import dayjs from 'dayjs';
@@ -13,15 +14,22 @@ dotenv.config({
   encoding: 'utf-8',
   path: ['.env.local', '.env.development', '.env.production', '.env'],
 });
-const { TEAM_NAME } = process.env;
 const { TEAM_CODE } = process.env;
 const { REDIS_URL } = process.env;
 const { MASTODON_BASE_URL } = process.env;
 const { MASTODON_TOKEN } = process.env;
 
 // Check configuration (all values should be set)
-if (!TEAM_NAME || !TEAM_CODE || !REDIS_URL || !MASTODON_BASE_URL || !MASTODON_TOKEN) {
+if (!TEAM_CODE || !REDIS_URL || !MASTODON_BASE_URL || !MASTODON_TOKEN) {
   logger.error('Missing configuration. Exiting ...');
+  process.exit(1);
+}
+
+// Find team in the dataset
+const Teams = JSON.parse(fs.readFileSync('./src/data/teams.json', 'utf-8'));
+const team = Teams.find((t) => t.abbreviation === TEAM_CODE.toUpperCase());
+if (!team) {
+  logger.error(`Invalid team code: ${TEAM_CODE}`);
   process.exit(1);
 }
 
@@ -51,34 +59,35 @@ const postMessageToMastodon = (message) => new Promise((resolve, reject) => {
 // If argv contains --cache:clear, remove key and exit
 if (process.argv.includes('--cache:clear')) {
   logger.info('Clearing cache ...');
-  await redisClient.del(`hockey-bot-odds-${TEAM_CODE}`);
+  await redisClient.del(`hockey-bot-odds-${team.abbreviation}`);
   process.exit(0);
 }
 
 // Sports Club Stats
 logger.info('Retrieving data from SportsClubStats ...');
-const sportsClubStatsOdds = await SportsClubStats.getLiveOdds(TEAM_NAME);
+const sportsClubStatsOdds = await SportsClubStats.getLiveOdds(team.name);
 const sportsClubStatsLastUpdate = await SportsClubStats.getLastUpdate();
 logger.debug({ sportsClubStatsOdds, sportsClubStatsLastUpdate });
 
 // MoneyPuck
 logger.info('Retrieving data from MoneyPuck ...');
-const moneyPuckOdds = await MoneyPuck.getLiveOdds(TEAM_CODE);
+const moneyPuckOdds = await MoneyPuck.getLiveOdds(team.abbreviation);
 const moneyPuckLastUpdate = await MoneyPuck.getLastUpdate();
 logger.debug({ moneyPuckOdds, moneyPuckLastUpdate });
 
 // Build consolidated message
-let message = `Update on playoff chances for the ${TEAM_NAME}:\n\n`;
+let message = `Updated playoff chances for the ${team.name}:\n\n`;
 if (dayjs().diff(sportsClubStatsLastUpdate, 'day') < 3) {
   message += `SportsClubStats: ${sportsClubStatsOdds.toFixed(1)}%\n`;
 }
 if (dayjs().diff(moneyPuckLastUpdate, 'day') < 3) {
-  message += `MoneyPuck: ${moneyPuckOdds.toFixed(1)}%`;
+  message += `MoneyPuck: ${moneyPuckOdds.toFixed(1)}%\n`;
 }
+message += `\n\n#NHL #${team.hashtag} #${team.abbreviation}`;
 logger.debug(message);
 
 // Check if message matches cached value
-const cachedOdds = await redisClient.get(`hockey-bot-odds-${TEAM_CODE}`);
+const cachedOdds = await redisClient.get(`hockey-bot-odds-${team.abbreviation}`);
 logger.debug({ cachedOdds });
 
 // Exit if no change in odds
@@ -102,7 +111,7 @@ try {
 
 // Cache the message to avoid sending it again
 logger.info('Updating cache ...');
-await redisClient.set(`hockey-bot-odds-${TEAM_CODE}`, message);
+await redisClient.set(`hockey-bot-odds-${team.abbreviation}`, message);
 logger.info('Cache updated.');
 
 // Clean up connections

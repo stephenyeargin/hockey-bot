@@ -1,0 +1,162 @@
+[
+  {
+    "name": "Anaheim Ducks",
+    "hashtag": "FlyTogether",
+    "abbreviation": "ANA"
+  },
+  {
+    "name": "Arizona Coyotes",
+    "hashtag": "Yotes",
+    "abbreviation": "ARI"
+  },
+  {
+    "name": "Boston Bruins",
+    "hashtag": "NHLBruins",
+    "abbreviation": "BOS"
+  },
+  {
+    "name": "Buffalo Sabres",
+    "hashtag": "LetsGoBuffalo",
+    "abbreviation": "BUF"
+  },
+  {
+    "name": "Calgary Flames",
+    "hashtag": "Flames",
+    "abbreviation": "CGY"
+  },
+  {
+    "name": "Carolina Hurricanes",
+    "hashtag": "CauseChaos",
+    "abbreviation": "CAR"
+  },
+  {
+    "name": "Chicago Blackhawks",
+    "hashtag": "Blackhawks",
+    "abbreviation": "CHI"
+  },
+  {
+    "name": "Colorado Avalanche",
+    "hashtag": "GoAvsGo",
+    "abbreviation": "COL"
+  },
+  {
+    "name": "Columbus Blue Jackets",
+    "hashtag": "CBJ",
+    "abbreviation": "CBJ"
+  },
+  {
+    "name": "Dallas Stars",
+    "hashtag": "TexasHockey",
+    "abbreviation": "DAL"
+  },
+  {
+    "name": "Detroit Red Wings",
+    "hashtag": "LGRW",
+    "abbreviation": "DET"
+  },
+  {
+    "name": "Edmonton Oilers",
+    "hashtag": "LetsGoOilers",
+    "abbreviation": "EDM"
+  },
+  {
+    "name": "Florida Panthers",
+    "hashtag": "TimeToHunt",
+    "abbreviation": "FLA"
+  },
+  {
+    "name": "Los Angeles Kings",
+    "hashtag": "GoKingsGo",
+    "abbreviation": "LAK"
+  },
+  {
+    "name": "Minnesota Wild",
+    "hashtag": "MNWild",
+    "abbreviation": "MIN"
+  },
+  {
+    "name": "Montreal Canadiens",
+    "hashtag": "GoHabsGo",
+    "abbreviation": "MTL"
+  },
+  {
+    "name": "Nashville Predators",
+    "hashtag": "Preds",
+    "abbreviation": "NSH"
+  },
+  {
+    "name": "New Jersey Devils",
+    "hashtag": "NJDevils",
+    "abbreviation": "NJD"
+  },
+  {
+    "name": "New York Islanders",
+    "hashtag": "Isles",
+    "abbreviation": "NYI"
+  },
+  {
+    "name": "New York Rangers",
+    "hashtag": "NYR",
+    "abbreviation": "NYR"
+  },
+  {
+    "name": "Ottawa Senators",
+    "hashtag": "GoSensGo",
+    "abbreviation": "OTT"
+  },
+  {
+    "name": "Philidelphia Flyers",
+    "hashtag": "LetsGoFlyers",
+    "abbreviation": "PHI"
+  },
+  {
+    "name": "Pittsburgh Penguins",
+    "hashtag": "LetsGoPens",
+    "abbreviation": "PIT"
+  },
+  {
+    "name": "St. Louis Blues",
+    "hashtag": "STLBlues",
+    "abbreviation": "STL"
+  },
+  {
+    "name": "San Jose Sharks",
+    "hashtag": "SJSharks",
+    "abbreviation": "SJS"
+  },
+  {
+    "name": "Seattle Kraken",
+    "hashtag": "SeaKraken",
+    "abbreviation": "SEA"
+  },
+  {
+    "name": "Tampa Bay Lightning",
+    "hashtag": "GoBolts",
+    "abbreviation": "TBL"
+  },
+  {
+    "name": "Toronto Maple Leafs",
+    "hashtag": "LeafsForever",
+    "abbreviation": "TOR"
+  },
+  {
+    "name": "Vancouver Canucks",
+    "hashtag": "Canucks",
+    "abbreviation": "VAN"
+  },
+  {
+    "name": "Vegas Golden Knights",
+    "hashtag": "VegasBorn",
+    "abbreviation": "VGK"
+  },
+  {
+    "name": "Washington Capitals",
+    "hashtag": "ALLCAPS",
+    "abbreviation": "WSH"
+  },
+  {
+    "name": "Winnipeg Jets",
+    "hashtag": "GoJetsGo",
+    "abbreviation": "WPG"
+  }
+]

@@ -14,7 +14,6 @@ Copy the `.env` file to `.env.local` and update with the values below.
 
 | Environment Variable | Description | Example |
 | -------------------- | ----------- | ------- |
-| `TEAM_NAME`          | Name of team (as shown on SportsClubStats) | `Nashville Predators` |
 | `TEAM_CODE`          | Abbreviation of team (as shown on MoneyPuck) | `NSH` |
 | `REDIS_URL`          | URL of a Redis server | `redis://localhost:6379` |
 | `MASTODON_BASE_URL`  | Base URL of the Mastodon server | `https://mastodon.social` |
