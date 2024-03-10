@@ -64,7 +64,7 @@ if (process.argv.includes('--cache:clear')) {
 }
 
 // Sports Club Stats
-logger.info('Retrieving data from SportsClubStats ...');
+logger.info('Retrieving data from Sports Club Stats ...');
 const sportsClubStatsOdds = await SportsClubStats.getLiveOdds(team.name);
 const sportsClubStatsLastUpdate = await SportsClubStats.getLastUpdate();
 logger.debug({ sportsClubStatsOdds, sportsClubStatsLastUpdate });
@@ -78,7 +78,7 @@ logger.debug({ moneyPuckOdds, moneyPuckLastUpdate });
 // Build consolidated message
 let message = `Updated playoff chances for the ${team.name}:\n\n`;
 if (dayjs().diff(sportsClubStatsLastUpdate, 'day') < 3) {
-  message += `SportsClubStats: ${sportsClubStatsOdds.toFixed(1)}%\n`;
+  message += `Sports Club Stats: ${sportsClubStatsOdds.toFixed(1)}%\n`;
 }
 if (dayjs().diff(moneyPuckLastUpdate, 'day') < 3) {
   message += `MoneyPuck: ${moneyPuckOdds.toFixed(1)}%\n`;
