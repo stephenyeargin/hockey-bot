@@ -9,7 +9,7 @@ const SportsClubStats = {
     axios.get(SPORTS_CLUB_STATS_DATA_FEED)
       .then((response) => {
         const lastModified = response.headers['last-modified'];
-        resolve(dayjs(lastModified).format());
+        resolve(dayjs(lastModified));
       })
       .catch(reject);
   }),

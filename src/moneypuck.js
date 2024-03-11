@@ -9,7 +9,7 @@ const MONEYPUCK_CSV_FILE_URL = 'https://moneypuck.com/moneypuck/simulations/simu
 const MoneyPuck = {
   getLastUpdate: async () => new Promise((resolve, reject) => {
     axios.get(MONEYPUCK_UPDATED_TS_URL)
-      .then((response) => resolve(dayjs(response.data).format()))
+      .then((response) => resolve(dayjs(response.data)))
       .catch(reject);
   }),
   getLiveOdds: async (teamCode) => new Promise((resolve, reject) => {
