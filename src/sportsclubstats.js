@@ -18,6 +18,10 @@ const SportsClubStats = {
       .then((response) => {
         const dataFeed = response.data;
         const history = dataFeed.data.find((row) => row.label === teamName);
+        if (!history) {
+          reject(new Error(`Could not find team ${teamName}`));
+          return;
+        }
         const odds = history.data[history.data.length - 1];
         logger.trace(dataFeed);
         resolve(odds);
