@@ -170,7 +170,7 @@ const updateOdds = async (teamCode) => {
   if (showMoneyPuckOdds) {
     message += `• MoneyPuck: ${formatOdds(moneyPuckOdds)}\n`;
   }
-  message += `\n\n#NHL #${team.hashtag} #${team.abbreviation} #${team.name.replace(' ', '')}`;
+  message += `\n\n#NHL #${team.hashtag} #${team.abbreviation} #${team.name.replace(/\s/g, '')}`;
   logger.debug(message);
 
   // Use latest timestamp
