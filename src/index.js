@@ -151,7 +151,7 @@ const updateOdds = async (teamCode) => {
   logger.debug({ cachedOdds });
 
   // Exit if no change in odds
-  if (process.env.LOG_LEVEL !== 'debug' && cachedOdds === newOdds) {
+  if (cachedOdds === newOdds) {
     logger.info('No update required.');
     return;
   }
