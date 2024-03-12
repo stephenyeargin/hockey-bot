@@ -25,7 +25,7 @@ describe('SportsClubStats', () => {
       });
 
     const lastUpdate = await SportsClubStats.getLastUpdate();
-    expect(lastUpdate.format()).toEqual('2024-03-08T20:39:04-06:00');
+    expect(lastUpdate.format()).toEqual('2024-03-09T02:39:04+00:00');
   });
 
   it('should get live odds', async () => {

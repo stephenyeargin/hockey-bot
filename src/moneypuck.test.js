@@ -22,7 +22,7 @@ describe('MoneyPuck', () => {
       .reply(200, '2024-03-09 00:50:54.979432-05:00');
 
     const lastUpdate = await MoneyPuck.getLastUpdate();
-    expect(lastUpdate.format()).toEqual('2024-03-08T23:50:54-06:00');
+    expect(lastUpdate.format()).toEqual('2024-03-09T05:50:54+00:00');
   });
 
   it('should get live odds', async () => {
