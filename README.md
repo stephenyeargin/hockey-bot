@@ -12,12 +12,14 @@ Posts the latest playoff odds for the configured team to Mastodon.
 
 Copy the `.env` file to `.env.local` and update with the values below.
 
-| Environment Variable | Description | Example |
-| -------------------- | ----------- | ------- |
-| `TEAM_CODE`          | Abbreviation of team (as shown on MoneyPuck) | `NSH` |
-| `REDIS_URL`          | URL of a Redis server | `redis://localhost:6379` |
-| `MASTODON_BASE_URL`  | Base URL of the Mastodon server | `https://mastodon.social` |
-| `MASTODON_TOKEN`     | API token for your bot | `someratherlong_apitoken123` |
+| Environment Variable | Required? | Description | Example |
+| -------------------- | --------- | ----------- | ------- |
+| `TEAM_CODE`          | No[^1]        | Abbreviation of team (as shown on MoneyPuck) | `NSH` |
+| `REDIS_URL`          | Yes       | URL of a Redis server | `redis://localhost:6379` |
+| `MASTODON_BASE_URL`  | Yes       | Base URL of the Mastodon server | `https://mastodon.social` |
+| `MASTODON_TOKEN`     | Yes       | API token for your bot | `someratherlong_apitoken123` |
+
+[^1]: If you leave this blank, it will generate posts for all teams with greater than a 0.01% chance.
 
 ## Running
 

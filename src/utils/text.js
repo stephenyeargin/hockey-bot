@@ -1,5 +1,6 @@
 export const formatOdds = (odds) => {
-  if (odds === 100) {
+  // It's practically 100
+  if (odds > 99.99) {
     return '100% ✓';
   }
 

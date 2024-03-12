@@ -49,7 +49,7 @@ const generateImage = async ({
     ctx.fontStretch = ctx.fillText((`Playoff odds for the ${team.name}`).toUpperCase(), 400, 110);
 
     // Team Logo
-    ctx.drawImage(logo, 350, 110, 400, 400);
+    ctx.drawImage(logo, 360, 110, 400, 400);
 
     let currentYPosition = 200;
 
@@ -57,11 +57,11 @@ const generateImage = async ({
     if (moneyPuckOdds) {
       ctx.fillStyle = '#000080';
       ctx.font = '30pt GothicA1-Black';
-      ctx.fillText('MoneyPuck', 250, currentYPosition);
+      ctx.fillText('MoneyPuck', 230, currentYPosition);
 
       ctx.fillStyle = '#800000';
       ctx.font = '60pt GothicA1-Black';
-      ctx.fillText(formatOdds(moneyPuckOdds), 250, currentYPosition + 70);
+      ctx.fillText(formatOdds(moneyPuckOdds), 230, currentYPosition + 70);
       currentYPosition = 350;
     }
 
@@ -69,11 +69,11 @@ const generateImage = async ({
     if (sportsClubStatsOdds) {
       ctx.fillStyle = '#000080';
       ctx.font = '30pt GothicA1-Black';
-      ctx.fillText('Sports Club Stats', 250, currentYPosition);
+      ctx.fillText('Sports Club Stats', 230, currentYPosition);
 
       ctx.fillStyle = '#800000';
       ctx.font = '60pt GothicA1-Black';
-      ctx.fillText(formatOdds(sportsClubStatsOdds), 250, currentYPosition + 70);
+      ctx.fillText(formatOdds(sportsClubStatsOdds), 230, currentYPosition + 70);
     }
 
     // Divider
