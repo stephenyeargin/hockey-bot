@@ -54,7 +54,7 @@ if (!teamList.length) {
  * @param {Buffer} image Image to post
  * @returns
  */
-const postImageToMastodon = (image, message) => new Promise((resolve, reject) => {
+const postImageToMastodon = (image, caption) => new Promise((resolve, reject) => {
   const form = new FormData();
   form.append('file', image, {
     filename: 'image.png',
@@ -62,7 +62,7 @@ const postImageToMastodon = (image, message) => new Promise((resolve, reject) =>
     contentType: 'image/png',
     knownLength: image.length,
   });
-  form.append('description', message);
+  form.append('description', caption);
 
   axios.post(`${MASTODON_BASE_URL}/api/v1/media`, form, {
     headers: {
@@ -164,11 +164,11 @@ const updateOdds = async (teamCode) => {
 
   // Build consolidated message
   let message = `Updated playoff chances for the ${team.name}:\n\n`;
-  if (showSportsClubStatsOdds) {
-    message += `• Sports Club Stats: ${formatOdds(sportsClubStatsOdds)}\n`;
-  }
   if (showMoneyPuckOdds) {
     message += `• MoneyPuck: ${formatOdds(moneyPuckOdds)}\n`;
+  }
+  if (showSportsClubStatsOdds) {
+    message += `• Sports Club Stats: ${formatOdds(sportsClubStatsOdds)}\n`;
   }
   message += `\n\n#NHL #${team.hashtag} #${team.abbreviation} #${team.name.replace(/(\s|\.)/g, '')}`;
   logger.debug(message);
@@ -193,10 +193,11 @@ const updateOdds = async (teamCode) => {
   });
 
   // Post image to Mastodon
+  const caption = `${message}\n\nUpdated ${updatedAt}`;
   logger.info('Posting image to Mastodon ...');
   let media = null;
   try {
-    media = await postImageToMastodon(image, message);
+    media = await postImageToMastodon(image, caption);
     if (media && media.id) {
       logger.info(`Image posted to Mastodon. ID: ${media.id}`);
       logger.debug(media);

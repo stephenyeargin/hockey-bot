@@ -2,161 +2,193 @@
   {
     "name": "Anaheim Ducks",
     "hashtag": "FlyTogether",
-    "abbreviation": "ANA"
+    "abbreviation": "ANA",
+    "teamColor": "#F47A38"
   },
   {
     "name": "Arizona Coyotes",
     "hashtag": "Yotes",
-    "abbreviation": "ARI"
+    "abbreviation": "ARI",
+    "teamColor": "#FFB81C"
   },
   {
     "name": "Boston Bruins",
     "hashtag": "NHLBruins",
-    "abbreviation": "BOS"
+    "abbreviation": "BOS",
+    "teamColor": "#FFB81C"
   },
   {
     "name": "Buffalo Sabres",
     "hashtag": "LetsGoBuffalo",
-    "abbreviation": "BUF"
+    "abbreviation": "BUF",
+    "teamColor": "#002654"
   },
   {
     "name": "Calgary Flames",
     "hashtag": "Flames",
-    "abbreviation": "CGY"
+    "abbreviation": "CGY",
+    "teamColor": "#C8102E"
   },
   {
     "name": "Carolina Hurricanes",
     "hashtag": "CauseChaos",
-    "abbreviation": "CAR"
+    "abbreviation": "CAR",
+    "teamColor": "#CC0000"
   },
   {
     "name": "Chicago Blackhawks",
     "hashtag": "Blackhawks",
-    "abbreviation": "CHI"
+    "abbreviation": "CHI",
+    "teamColor": "#CF0A2C"
   },
   {
     "name": "Colorado Avalanche",
     "hashtag": "GoAvsGo",
-    "abbreviation": "COL"
+    "abbreviation": "COL",
+    "teamColor": "#6F263D"
   },
   {
     "name": "Columbus Blue Jackets",
     "hashtag": "CBJ",
-    "abbreviation": "CBJ"
+    "abbreviation": "CBJ",
+    "teamColor": "#002654"
   },
   {
     "name": "Dallas Stars",
     "hashtag": "TexasHockey",
-    "abbreviation": "DAL"
+    "abbreviation": "DAL",
+    "teamColor": "#006847"
   },
   {
     "name": "Detroit Red Wings",
     "hashtag": "LGRW",
-    "abbreviation": "DET"
+    "abbreviation": "DET",
+    "teamColor": "#CE1126"
   },
   {
     "name": "Edmonton Oilers",
     "hashtag": "LetsGoOilers",
-    "abbreviation": "EDM"
+    "abbreviation": "EDM",
+    "teamColor": "#041E42"
   },
   {
     "name": "Florida Panthers",
     "hashtag": "TimeToHunt",
-    "abbreviation": "FLA"
+    "abbreviation": "FLA",
+    "teamColor": "#041E42"
   },
   {
     "name": "Los Angeles Kings",
     "hashtag": "GoKingsGo",
-    "abbreviation": "LAK"
+    "abbreviation": "LAK",
+    "teamColor": "#111111"
   },
   {
     "name": "Minnesota Wild",
     "hashtag": "MNWild",
-    "abbreviation": "MIN"
+    "abbreviation": "MIN",
+    "teamColor": "#154734"
   },
   {
     "name": "Montreal Canadiens",
     "hashtag": "GoHabsGo",
-    "abbreviation": "MTL"
+    "abbreviation": "MTL",
+    "teamColor": "#AF1E2D"
   },
   {
     "name": "Nashville Predators",
     "hashtag": "Preds",
-    "abbreviation": "NSH"
+    "abbreviation": "NSH",
+    "teamColor": "#FFB81C"
   },
   {
     "name": "New Jersey Devils",
     "hashtag": "NJDevils",
-    "abbreviation": "NJD"
+    "abbreviation": "NJD",
+    "teamColor": "#CE1126"
   },
   {
     "name": "New York Islanders",
     "hashtag": "Isles",
-    "abbreviation": "NYI"
+    "abbreviation": "NYI",
+    "teamColor": "#00539B"
   },
   {
     "name": "New York Rangers",
     "hashtag": "NYR",
-    "abbreviation": "NYR"
+    "abbreviation": "NYR",
+    "teamColor": "#0038A8"
   },
   {
     "name": "Ottawa Senators",
     "hashtag": "GoSensGo",
-    "abbreviation": "OTT"
+    "abbreviation": "OTT",
+    "teamColor": "#C52032"
   },
   {
     "name": "Philadelphia Flyers",
     "hashtag": "LetsGoFlyers",
-    "abbreviation": "PHI"
+    "abbreviation": "PHI",
+    "teamColor": "#F74902"
   },
   {
     "name": "Pittsburgh Penguins",
     "hashtag": "LetsGoPens",
-    "abbreviation": "PIT"
+    "abbreviation": "PIT",
+    "teamColor": "#000000"
   },
   {
     "name": "St. Louis Blues",
     "hashtag": "STLBlues",
-    "abbreviation": "STL"
+    "abbreviation": "STL",
+    "teamColor": "#002F87"
   },
   {
     "name": "San Jose Sharks",
     "hashtag": "SJSharks",
-    "abbreviation": "SJS"
+    "abbreviation": "SJS",
+    "teamColor": "#006D75"
   },
   {
     "name": "Seattle Kraken",
     "hashtag": "SeaKraken",
-    "abbreviation": "SEA"
+    "abbreviation": "SEA",
+    "teamColor": "#001628"
   },
   {
     "name": "Tampa Bay Lightning",
     "hashtag": "GoBolts",
-    "abbreviation": "TBL"
+    "abbreviation": "TBL",
+    "teamColor": "#002868"
   },
   {
     "name": "Toronto Maple Leafs",
     "hashtag": "LeafsForever",
-    "abbreviation": "TOR"
+    "abbreviation": "TOR",
+    "teamColor": "#00205B"
   },
   {
     "name": "Vancouver Canucks",
     "hashtag": "Canucks",
-    "abbreviation": "VAN"
+    "abbreviation": "VAN",
+    "teamColor": "#00205B"
   },
   {
     "name": "Vegas Golden Knights",
     "hashtag": "VegasBorn",
-    "abbreviation": "VGK"
+    "abbreviation": "VGK",
+    "teamColor": "#B4975A"
   },
   {
     "name": "Washington Capitals",
     "hashtag": "ALLCAPS",
-    "abbreviation": "WSH"
+    "abbreviation": "WSH",
+    "teamColor": "#041E42"
   },
   {
     "name": "Winnipeg Jets",
     "hashtag": "GoJetsGo",
-    "abbreviation": "WPG"
+    "abbreviation": "WPG",
+    "teamColor": "#C8102E"
   }
 ]
