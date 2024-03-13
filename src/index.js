@@ -86,6 +86,7 @@ const postMessageToMastodon = (message, media) => new Promise((resolve, reject) 
   axios.post(`${MASTODON_BASE_URL}/api/v1/statuses`, {
     status: message,
     media_ids: [media.id],
+    visibility: 'public',
   }, {
     headers: {
       Authorization: `Bearer ${MASTODON_TOKEN}`,
