@@ -1,8 +1,5 @@
 import process from 'node:process';
 import fs from 'node:fs';
-import axios from 'axios';
-import FormData from 'form-data';
-import dotenv from 'dotenv';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import minMax from 'dayjs/plugin/minMax.js';
@@ -13,24 +10,18 @@ import MoneyPuck from './moneypuck.js';
 import SportsClubStats from './sportsclubstats.js';
 import generateImage from './utils/imageGenerator.js';
 import { formatOdds } from './utils/text.js';
+import { postImageToMastodon, postMessageToMastodon } from './utils/mastodon.js';
 
 // Date formatting settings
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(minMax);
 
-// Load configuration from environment
-dotenv.config({
-  debug: process.env.LOG_LEVEL === 'debug',
-  encoding: 'utf-8',
-  path: ['.env.local', '.env.development', '.env.production', '.env'],
-});
-const { TEAM_CODE } = process.env;
-const { REDIS_URL } = process.env;
-const { MASTODON_BASE_URL } = process.env;
-const { MASTODON_TOKEN } = process.env;
+const {
+  TEAM_CODE, REDIS_URL, MASTODON_BASE_URL, MASTODON_TOKEN,
+} = process.env;
 
-// Check configuration (all values should be set)
+// Check configuration
 if (!REDIS_URL || !MASTODON_BASE_URL || !MASTODON_TOKEN) {
   logger.error('Missing configuration. Exiting ...');
   process.exit(1);
@@ -48,56 +39,6 @@ if (!teamList.length) {
   logger.error('No teams found. Exiting ...');
   process.exit(1);
 }
-
-/**
- * Post image to Mastodon
- * @param {Buffer} image Image to post
- * @returns
- */
-const postImageToMastodon = (image, caption) => new Promise((resolve, reject) => {
-  const form = new FormData();
-  form.append('file', image, {
-    filename: 'image.png',
-    filepath: 'image.png',
-    contentType: 'image/png',
-    knownLength: image.length,
-  });
-  form.append('description', caption);
-
-  axios.post(`${MASTODON_BASE_URL}/api/v1/media`, form, {
-    headers: {
-      Authorization: `Bearer ${MASTODON_TOKEN}`,
-    },
-  })
-    .then((response) => {
-      logger.debug(response.data);
-      resolve(response.data);
-    })
-    .catch(reject);
-});
-
-/**
- * Post Message to Mastodon
- * @param {string} message
- * @param {object} media
- * @returns
- */
-const postMessageToMastodon = (message, media) => new Promise((resolve, reject) => {
-  axios.post(`${MASTODON_BASE_URL}/api/v1/statuses`, {
-    status: message,
-    media_ids: [media.id],
-    visibility: 'public',
-  }, {
-    headers: {
-      Authorization: `Bearer ${MASTODON_TOKEN}`,
-    },
-  })
-    .then((response) => {
-      logger.debug(response.data);
-      resolve(response.data);
-    })
-    .catch(reject);
-});
 
 // Connect to Redis
 const redisClient = await getRedisClient(REDIS_URL);
@@ -117,10 +58,12 @@ const updateOdds = async (teamCode) => {
 
   // If argv contains --cache:clear, remove key and exit
   if (process.argv.includes('--cache:clear')) {
-    logger.info('Clearing cache ...');
+    logger.info(`Clearing cache for 'hockey-bot-odds-${team.abbreviation}' ...`);
     await redisClient.del(`hockey-bot-odds-${team.abbreviation}`);
     return;
   }
+
+  logger.info(`Updating odds for ${team.name} ...`);
 
   // Sports Club Stats
   logger.info('Retrieving data from Sports Club Stats ...');
@@ -194,31 +137,33 @@ const updateOdds = async (teamCode) => {
   });
 
   // Post image to Mastodon
-  const caption = `${message}\n\nUpdated ${updatedAt}`;
+  const description = `${message}\n\nUpdated ${updatedAt}`;
   logger.info('Posting image to Mastodon ...');
   let media = null;
   try {
-    media = await postImageToMastodon(image, caption);
+    media = await postImageToMastodon({ image, description });
     if (media && media.id) {
       logger.info(`Image posted to Mastodon. ID: ${media.id}`);
       logger.debug(media);
     }
   } catch (error) {
-    logger.error(error);
-    return;
+    logger.error('Failed to post image!');
+    logger.debug(error.errors);
+    process.exit(1);
   }
 
   // Post message to Mastodon
   logger.info('Posting message to Mastodon ...');
   try {
-    const status = await postMessageToMastodon(message, media);
+    const status = await postMessageToMastodon({ message, media });
     if (status && status.uri) {
       logger.info(`Message posted to Mastodon. Link: ${status.uri}`);
       logger.debug(status);
     }
   } catch (error) {
-    logger.error(error);
-    return;
+    logger.error('Failed to post message!');
+    logger.debug(error.errors);
+    process.exit(1);
   }
 
   // Cache the new odds to avoid sending the same update again
@@ -230,7 +175,6 @@ const updateOdds = async (teamCode) => {
 // Update odds for each team
 // eslint-disable-next-line no-restricted-syntax
 for await (const teamCode of teamList) {
-  logger.info(`Updating odds for ${teamCode} ...`);
   await updateOdds(teamCode);
 }
 

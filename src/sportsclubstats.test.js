@@ -19,8 +19,8 @@ describe('SportsClubStats', () => {
     Date.now = () => Date.parse('Fri Mar 9 02:00:00 CST 2024');
 
     nock('http://www.sportsclubstats.com')
-      .get('/d/NHL_ChanceWillMakePlayoffs_Small_A.json')
-      .replyWithFile(200, './src/test/fixtures/sportsclubstats-odds.json', {
+      .head('/d/NHL_ChanceWillMakePlayoffs_Small_A.json')
+      .reply(200, '', {
         'last-modified': 'Sat, 09 Mar 2024 02:39:04 GMT',
       });
 
