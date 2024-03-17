@@ -12,8 +12,5 @@ export const formatOdds = (odds) => {
   ).format(odds)}%`;
 };
 
-export const formatDate = (date) => new Date(date).toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
+// eslint-disable-next-line no-bitwise
+export const hashCode = (s) => s.split('').reduce((a, b) => (((a << 5) - a) + b.charCodeAt(0)) | 0, 0);
