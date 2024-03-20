@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "start:dev": "LOG_LEVEL=debug node src/index.js | pino-pretty",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint --fix ./src",
     "cache:clear": "LOG_LEVEL=debug node src/index.js --cache:clear | pino-pretty",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js ./src/ --detectOpenHandles",
     "prepare": "husky"

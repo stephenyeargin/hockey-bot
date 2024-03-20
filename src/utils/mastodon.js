@@ -63,12 +63,15 @@ export const postImageToMastodon = ({ image, description }) => new Promise((reso
  * @param {object} media
  * @returns
  */
-export const postMessageToMastodon = ({ message, media }) => new Promise((resolve, reject) => {
+export const postMessageToMastodon = ({
+  message, media, thread,
+}) => new Promise((resolve, reject) => {
   const { MASTODON_BASE_URL, MASTODON_TOKEN } = loadConfiguration();
   axios.post(`${MASTODON_BASE_URL}/api/v1/statuses`, {
     status: message,
     media_ids: [media.id],
     visibility: 'public',
+    in_reply_to_id: thread?.id || null,
   }, {
     headers: {
       Authorization: `Bearer ${MASTODON_TOKEN}`,
