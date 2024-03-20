@@ -65,7 +65,7 @@ const moneyPuckLastUpdate = await MoneyPuck.getLastUpdate();
 // Compare new odds to cached odds
 const cachedLeagueOdds = await redisClient.get('hockey-bot-odds-league');
 if (cachedLeagueOdds === JSON.stringify({ moneyPuckOdds, sportsClubStatsOdds })) {
-  logger.info('No new odds found.');
+  logger.info('Odds in cache match, no updates needed.');
   process.exit(0);
 }
 
@@ -154,10 +154,9 @@ const postTeamOdds = async ({ teamCode, thread }) => {
     process.exit(1);
   }
 
-  logger.info(`Updating odds for ${team.name} ...`);
+  logger.info(`Posting odds for ${team.name} ...`);
 
   // Sports Club Stats
-  logger.info('Retrieving data from Sports Club Stats ...');
   logger.debug({
     sportsClubStatsOdds: sportsClubStatsOdds[team.abbreviation],
     sportsClubStatsLastUpdate,
@@ -165,7 +164,6 @@ const postTeamOdds = async ({ teamCode, thread }) => {
   const showSportsClubStatsOdds = dayjs().diff(sportsClubStatsLastUpdate, 'day') < 2;
 
   // MoneyPuck
-  logger.info('Retrieving data from MoneyPuck ...');
   logger.debug({ moneyPuckOdds: moneyPuckOdds[team.abbreviation], moneyPuckLastUpdate });
   const showMoneyPuckOdds = dayjs().diff(moneyPuckLastUpdate, 'day') < 2;
 
@@ -175,7 +173,7 @@ const postTeamOdds = async ({ teamCode, thread }) => {
     return;
   }
 
-  // Check if message matches cached value
+  // Check if new odds match cached value
   const newOdds = JSON.stringify({
     sportsClubStatsOdds: sportsClubStatsOdds[team.abbreviation],
     moneyPuckOdds: moneyPuckOdds[team.abbreviation],
