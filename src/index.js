@@ -1,3 +1,4 @@
+import axios from 'axios';
 import process from 'node:process';
 import fs from 'node:fs';
 import dayjs from 'dayjs';
@@ -8,7 +9,7 @@ import getRedisClient from './utils/redis.js';
 import logger from './utils/logger.js';
 import MoneyPuck from './moneypuck.js';
 import SportsClubStats from './sportsclubstats.js';
-import generateImage from './utils/imageGenerator.js';
+import { generateLeaguePlayoffOddsImage, generateTeamPlayoffOddsImage } from './utils/imageGenerator.js';
 import { formatOdds } from './utils/text.js';
 import { postImageToMastodon, postMessageToMastodon } from './utils/mastodon.js';
 
@@ -43,12 +44,109 @@ if (!teamList.length) {
 // Connect to Redis
 const redisClient = await getRedisClient(REDIS_URL);
 
+// If argv contains --cache:clear, remove key and exit
+if (process.argv.includes('--cache:clear')) {
+  logger.info('Clearing cache for \'hockey-bot-odds-league\' ...');
+  await redisClient.del('hockey-bot-odds-league');
+  const promises = Teams.map(async (team) => {
+    logger.info(`Clearing cache for 'hockey-bot-odds-${team.abbreviation}' ...`);
+    await redisClient.del(`hockey-bot-odds-${team.abbreviation}`);
+  });
+  await Promise.all(promises);
+  process.exit(0);
+}
+
+// Get latest odds
+const sportsClubStatsOdds = await SportsClubStats.getLeagueLiveOdds();
+const sportsClubStatsLastUpdate = await SportsClubStats.getLastUpdate();
+const moneyPuckOdds = await MoneyPuck.getLeagueLiveOdds();
+const moneyPuckLastUpdate = await MoneyPuck.getLastUpdate();
+
+// Compare new odds to cached odds
+const cachedLeagueOdds = await redisClient.get('hockey-bot-odds-league');
+if (cachedLeagueOdds === JSON.stringify({ moneyPuckOdds, sportsClubStatsOdds })) {
+  logger.info('Odds in cache match, no updates needed.');
+  process.exit(0);
+}
+
+// Use latest timestamp
+const updatedAt = dayjs(dayjs.max([
+  sportsClubStatsLastUpdate,
+  moneyPuckLastUpdate,
+])).tz('America/New_York').format('MMMM D, YYYY h:mm A ET');
+
+// Get NHL standings
+const standings = await axios.get('https://api-web.nhle.com/v1/standings/now')
+  .then((response) => response.data.standings)
+  .catch((error) => {
+    logger.error('Could not retrieve league standings!');
+    logger.error(error);
+    process.exit(1);
+  });
+
 /**
- * Update Odds
+ * Post latest league odds to Mastodon.
+ * @param {object} standings
+ * @param {object} moneyPuckOdds
+ * @param {object} sportsClubStatsOdds
+ */
+const postLeagueOdds = async () => {
+  const image = await generateLeaguePlayoffOddsImage({
+    teams: Teams,
+    standings,
+    moneyPuckOdds,
+    sportsClubStatsOdds,
+    updatedAt,
+  });
+
+  // Build caption
+  let description = '';
+  standings
+    .sort((a, b) => {
+      if (a.wildcardSequence === b.wildcardSequence) {
+        if (a.divisionAbbrev === b.divisionAbbrev) {
+          return (a.divisionSequence > b.divisionSequence) ? 1 : -1;
+        }
+        return (a.divisionAbbrev > b.divisionAbbrev) ? 1 : -1;
+      }
+      return (a.wildcardSequence > b.wildcardSequence) ? 1 : -1;
+    })
+    .forEach((team) => {
+      description += `${team.teamName.default} | MP: ${formatOdds(moneyPuckOdds[team.teamAbbrev.default])}`;
+      description += ` | SCS: ${formatOdds(sportsClubStatsOdds[team.teamAbbrev.default])}\n`;
+    });
+  description += `\nUpdated: ${updatedAt}`;
+
+  // Extract all hashtags from Teams as string (if odds > 0)
+  const hashtags = Teams
+    .filter((t) => sportsClubStatsOdds[t.abbreviation] > 0 && moneyPuckOdds[t.abbreviation] > 0)
+    .map((t) => `#${t.hashtag}`).join(' ');
+
+  // Upload image
+  const media = await postImageToMastodon({ image, description });
+
+  // Post message to Mastodon
+  logger.info('Posting message to Mastodon ...');
+  try {
+    const status = await postMessageToMastodon({ message: `#nhl ${hashtags}`, media });
+    if (status && status.uri) {
+      logger.info(`Message posted to Mastodon. Link: ${status.uri}`);
+      logger.debug(status);
+    }
+    return status;
+  } catch (error) {
+    logger.error('Failed to post league odds!');
+    logger.debug(error);
+    return process.exit(1);
+  }
+};
+
+/**
+ * Post latest team odds to Mastodon.
  * @param {string} teamCode Abbreviation for team
  * @returns void
  */
-const updateOdds = async (teamCode) => {
+const postTeamOdds = async ({ teamCode, thread }) => {
   // Validate Team Code
   const team = Teams.find((t) => t.abbreviation === teamCode.toUpperCase());
   if (!team) {
@@ -56,27 +154,17 @@ const updateOdds = async (teamCode) => {
     process.exit(1);
   }
 
-  // If argv contains --cache:clear, remove key and exit
-  if (process.argv.includes('--cache:clear')) {
-    logger.info(`Clearing cache for 'hockey-bot-odds-${team.abbreviation}' ...`);
-    await redisClient.del(`hockey-bot-odds-${team.abbreviation}`);
-    return;
-  }
-
-  logger.info(`Updating odds for ${team.name} ...`);
+  logger.info(`Posting odds for ${team.name} ...`);
 
   // Sports Club Stats
-  logger.info('Retrieving data from Sports Club Stats ...');
-  const sportsClubStatsOdds = await SportsClubStats.getLiveOdds(team.name);
-  const sportsClubStatsLastUpdate = await SportsClubStats.getLastUpdate();
-  logger.debug({ sportsClubStatsOdds, sportsClubStatsLastUpdate });
+  logger.debug({
+    sportsClubStatsOdds: sportsClubStatsOdds[team.abbreviation],
+    sportsClubStatsLastUpdate,
+  });
   const showSportsClubStatsOdds = dayjs().diff(sportsClubStatsLastUpdate, 'day') < 2;
 
   // MoneyPuck
-  logger.info('Retrieving data from MoneyPuck ...');
-  const moneyPuckOdds = await MoneyPuck.getLiveOdds(team.abbreviation);
-  const moneyPuckLastUpdate = await MoneyPuck.getLastUpdate();
-  logger.debug({ moneyPuckOdds, moneyPuckLastUpdate });
+  logger.debug({ moneyPuckOdds: moneyPuckOdds[team.abbreviation], moneyPuckLastUpdate });
   const showMoneyPuckOdds = dayjs().diff(moneyPuckLastUpdate, 'day') < 2;
 
   // Bail out if odds are too stale
@@ -85,10 +173,10 @@ const updateOdds = async (teamCode) => {
     return;
   }
 
-  // Check if message matches cached value
+  // Check if new odds match cached value
   const newOdds = JSON.stringify({
-    sportsClubStatsOdds,
-    moneyPuckOdds,
+    sportsClubStatsOdds: sportsClubStatsOdds[team.abbreviation],
+    moneyPuckOdds: moneyPuckOdds[team.abbreviation],
   });
   logger.debug({ newOdds });
   const cachedOdds = await redisClient.get(`hockey-bot-odds-${team.abbreviation}`);
@@ -101,7 +189,7 @@ const updateOdds = async (teamCode) => {
   }
 
   // Don't rub it in
-  if (sportsClubStatsOdds < 0.01 && moneyPuckOdds < 0.01) {
+  if (sportsClubStatsOdds[team.abbreviation] < 0.01 && moneyPuckOdds[team.abbreviation] < 0.01) {
     logger.info('Odds are zero.');
     return;
   }
@@ -109,29 +197,23 @@ const updateOdds = async (teamCode) => {
   // Build consolidated message
   let message = `Updated playoff chances for the ${team.name}:\n\n`;
   if (showMoneyPuckOdds) {
-    message += `• MoneyPuck: ${formatOdds(moneyPuckOdds)}\n`;
+    message += `• MoneyPuck: ${formatOdds(moneyPuckOdds[team.abbreviation])}\n`;
   }
   if (showSportsClubStatsOdds) {
-    message += `• Sports Club Stats: ${formatOdds(sportsClubStatsOdds)}\n`;
+    message += `• Sports Club Stats: ${formatOdds(sportsClubStatsOdds[team.abbreviation])}\n`;
   }
   message += `\n\n#NHL #${team.hashtag} #${team.abbreviation} #${team.name.replace(/(\s|\.)/g, '')}`;
   logger.debug(message);
 
-  // Use latest timestamp
-  const updatedAt = dayjs(dayjs.max([
-    sportsClubStatsLastUpdate,
-    moneyPuckLastUpdate,
-  ])).tz('America/New_York').format('MMMM D, YYYY h:mm A ET');
-
   // Generating image
   logger.info('Generating image ...');
-  const image = await generateImage({
+  const image = await generateTeamPlayoffOddsImage({
     team,
     sportsClubStatsOdds: showSportsClubStatsOdds
-      ? sportsClubStatsOdds
+      ? sportsClubStatsOdds[team.abbreviation]
       : false,
     moneyPuckOdds: showMoneyPuckOdds
-      ? moneyPuckOdds
+      ? moneyPuckOdds[team.abbreviation]
       : false,
     updatedAt,
   });
@@ -155,14 +237,14 @@ const updateOdds = async (teamCode) => {
   // Post message to Mastodon
   logger.info('Posting message to Mastodon ...');
   try {
-    const status = await postMessageToMastodon({ message, media });
+    const status = await postMessageToMastodon({ message, media, thread });
     if (status && status.uri) {
       logger.info(`Message posted to Mastodon. Link: ${status.uri}`);
       logger.debug(status);
     }
   } catch (error) {
-    logger.error('Failed to post message!');
-    logger.debug(error.errors);
+    logger.error('Failed to team odds!');
+    logger.debug(error);
     process.exit(1);
   }
 
@@ -172,10 +254,18 @@ const updateOdds = async (teamCode) => {
   logger.info('Cache updated.');
 };
 
+// Post odds for league
+const thread = await postLeagueOdds();
+
+// Cache the league odds to avoid sending the same update again
+logger.info('Updating cache ...');
+await redisClient.set('hockey-bot-odds-league', JSON.stringify({ moneyPuckOdds, sportsClubStatsOdds }));
+logger.info('Cache updated.');
+
 // Update odds for each team
 // eslint-disable-next-line no-restricted-syntax
 for await (const teamCode of teamList) {
-  await updateOdds(teamCode);
+  await postTeamOdds({ teamCode, thread });
 }
 
 // Clean up connections
