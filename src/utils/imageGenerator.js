@@ -26,8 +26,8 @@ const generateLeaguePlayoffOddsImage = async ({
   // Canvas background
   const canvas = createCanvas(800, 540);
   const ctx = canvas.getContext('2d');
-  const backgroundImg = await loadImage('./src/assets/images/puck-bg.png');
-  ctx.drawImage(backgroundImg, 0, 0);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, 800, 540);
 
   const wildcardRankings = ['1', '2', '3', '1', '2', '3', 'WC1', 'WC2', '', '', '', '', '', '', '', ''];
 
@@ -105,8 +105,8 @@ const generateTeamPlayoffOddsImage = async ({
   // Canvas background
   const canvas = createCanvas(800, 540);
   const ctx = canvas.getContext('2d');
-  const backgroundImg = await loadImage('./src/assets/images/puck-bg.png');
-  ctx.drawImage(backgroundImg, 0, 0);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, 800, 540);
 
   ctx.antialias = 'subpixel';
   ctx.filter = 'none';
