@@ -28,6 +28,7 @@ const loadConfiguration = () => {
 /**
  * Post image to Mastodon
  * @param {Buffer} image Image to post
+ * @param {string} description Image alternate text
  * @returns
  */
 export const postImageToMastodon = ({ image, description }) => new Promise((resolve, reject) => {
@@ -59,12 +60,14 @@ export const postImageToMastodon = ({ image, description }) => new Promise((reso
 
 /**
  * Post Message to Mastodon
- * @param {string} message
- * @param {object} media
+ * @param {string} message Message to post
+ * @param {object} media Associated image upload
+ * @param {object} thread Message to reply to
+ * @param {string} nonce Prevent repeated posting
  * @returns
  */
 export const postMessageToMastodon = ({
-  message, media, thread,
+  message, media, thread, nonce,
 }) => new Promise((resolve, reject) => {
   const { MASTODON_BASE_URL, MASTODON_TOKEN } = loadConfiguration();
   axios.post(`${MASTODON_BASE_URL}/api/v1/statuses`, {
@@ -75,7 +78,7 @@ export const postMessageToMastodon = ({
   }, {
     headers: {
       Authorization: `Bearer ${MASTODON_TOKEN}`,
-      'Idempotency-Key': hashCode(message),
+      'Idempotency-Key': hashCode(nonce),
     },
   })
     .then((response) => {

@@ -22,7 +22,7 @@ describe('Mastodon', () => {
       .matchHeader('Authorization', 'Bearer some_long_token')
       .reply(200, { id: '123' });
 
-    const result = await postMessageToMastodon({ message: 'Hello world!', media: [456] });
+    const result = await postMessageToMastodon({ message: 'Hello world!', media: [456], nonce: 'some_nonce' });
     expect(result).toEqual({ id: '123' });
     expect(nock.isDone()).toBeTruthy();
     expect(nock.pendingMocks()).toEqual([]);
