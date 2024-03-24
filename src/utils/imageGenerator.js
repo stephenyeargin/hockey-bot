@@ -111,9 +111,9 @@ const generateTeamPlayoffOddsImage = async ({
   ctx.antialias = 'subpixel';
   ctx.filter = 'none';
 
-  // Heading Background Box
+  // Heading background box with rounded top corners
   ctx.fillStyle = team.teamColor || '#111111';
-  ctx.fillRect(40, 40, 720, 80);
+  ctx.fillRect(40, 40, 720, 80, [10, 10, 0, 0]);
 
   // Heading
   ctx.fillStyle = '#FFFFFF';
