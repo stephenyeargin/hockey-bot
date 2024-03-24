@@ -128,7 +128,7 @@ const postLeagueOdds = async () => {
   // Post message to Mastodon
   logger.info('Posting message to Mastodon ...');
   try {
-    const status = await postMessageToMastodon({ message: `#nhl ${hashtags}`, media });
+    const status = await postMessageToMastodon({ message: `#nhl ${hashtags}`, media, nonce: description });
     if (status && status.uri) {
       logger.info(`Message posted to Mastodon. Link: ${status.uri}`);
       logger.debug(status);
@@ -237,7 +237,9 @@ const postTeamOdds = async ({ teamCode, thread }) => {
   // Post message to Mastodon
   logger.info('Posting message to Mastodon ...');
   try {
-    const status = await postMessageToMastodon({ message, media, thread });
+    const status = await postMessageToMastodon({
+      message, media, thread, nonce: message,
+    });
     if (status && status.uri) {
       logger.info(`Message posted to Mastodon. Link: ${status.uri}`);
       logger.debug(status);

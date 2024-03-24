@@ -1,202 +1,174 @@
-import * as PImage from 'pureimage';
-import fs from 'fs';
-import STREAM from 'node:stream';
+import { createCanvas, loadImage, registerFont } from 'canvas';
 import logger from './logger.js';
 import { formatOdds } from './text.js';
 
-const { PassThrough } = STREAM;
 const attributionLine = process.env.ATTRIBUTION_LINE || '@hockeybot@botsin.space';
 
 // Load fonts
-const GothicA1Black = PImage.registerFont(
+registerFont(
   './src/assets/fonts/GothicA1-Black.ttf',
-  'GothicA1-Black',
-  900,
+  {
+    family: 'GothicA1-Black',
+    weight: 900,
+  },
 );
-const GothicA1Regular = PImage.registerFont(
+registerFont(
   './src/assets/fonts/GothicA1-Regular.ttf',
-  'GothicA1-Regular',
-  400,
+  {
+    family: 'GothicA1-Regular',
+    weight: 400,
+  },
 );
 
 const generateLeaguePlayoffOddsImage = async ({
-  teams, standings, sportsClubStatsOdds, moneyPuckOdds, updatedAt,
+  standings, sportsClubStatsOdds, moneyPuckOdds, updatedAt,
 }) => {
   // Canvas background
-  const backgroundStream = await fs.createReadStream('./src/assets/images/puck-bg.png');
+  const canvas = createCanvas(800, 540);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, 800, 540);
 
-  // Team logos
-  const teamLogos = {};
-  await teams.forEach(async (team) => {
-    teamLogos[team.abbreviation] = await PImage.decodePNGFromStream(
-      fs.createReadStream(`./src/assets/images/team_logos/${team.abbreviation}_light.png`),
-    );
-  });
+  const wildcardRankings = ['1', '2', '3', '1', '2', '3', 'WC1', 'WC2', '', '', '', '', '', '', '', ''];
 
-  const wildcardRankings = ['1', '2', '3', '1', '2', '3', 'WC1', 'WC2', '', '', '', '', '', '', '', 11];
+  ctx.antialias = 'subpixel';
+  ctx.filter = 'none';
+  ctx.fillStyle = '#111111';
 
-  // Draw
-  return PImage.decodePNGFromStream(backgroundStream).then(async (img) => {
-    GothicA1Black.loadSync();
-    GothicA1Regular.loadSync();
+  // Data Source Headings
+  ctx.font = '12pt GothicA1-Black';
+  ctx.textAlign = 'left';
+  ctx.fillText('Western Conference', 60, 30);
+  ctx.textAlign = 'center';
+  ctx.fillText('SCS', 280, 30);
+  ctx.fillText('MP', 340, 30);
+  ctx.textAlign = 'left';
+  ctx.fillText('Eastern Conference', 460, 30);
+  ctx.textAlign = 'center';
+  ctx.fillText('SCS', 680, 30);
+  ctx.fillText('MP', 740, 30);
 
-    const ctx = img.getContext('2d');
-    ctx.antialias = 'subpixel';
-    ctx.filter = 'none';
-    ctx.fillStyle = '#111111';
-
-    // Data Source Headings
-    ctx.font = '12pt GothicA1-Black';
-    ctx.textAlign = 'left';
-    ctx.fillText('Western Conference', 40, 30);
-    ctx.textAlign = 'center';
-    ctx.fillText('SCS', 280, 30);
-    ctx.fillText('MP', 340, 30);
-    ctx.textAlign = 'left';
-    ctx.fillText('Eastern Conference', 440, 30);
-    ctx.textAlign = 'center';
-    ctx.fillText('SCS', 660, 30);
-    ctx.fillText('MP', 720, 30);
-
-    const drawStandings = (conferenceAbbrev, xOffset) => standings
-      .filter((t) => t.conferenceAbbrev === conferenceAbbrev)
-      .sort((a, b) => {
-        if (a.wildcardSequence === b.wildcardSequence) {
-          if (a.divisionAbbrev === b.divisionAbbrev) {
-            return (a.divisionSequence > b.divisionSequence) ? 1 : -1;
-          }
-          return (a.divisionAbbrev > b.divisionAbbrev) ? 1 : -1;
+  const drawStandings = async (conferenceAbbrev, xOffset) => standings
+    .filter((t) => t.conferenceAbbrev === conferenceAbbrev)
+    .sort((a, b) => {
+      if (a.wildcardSequence === b.wildcardSequence) {
+        if (a.divisionAbbrev === b.divisionAbbrev) {
+          return (a.divisionSequence > b.divisionSequence) ? 1 : -1;
         }
-        return (a.wildcardSequence > b.wildcardSequence) ? 1 : -1;
-      })
-      .forEach((team, i) => {
-        const logo = teamLogos[team.teamAbbrev.default];
-        ctx.drawImage(logo, xOffset, 40 + (i * 30), 30, 30);
-        ctx.font = '10pt GothicA1-Regular';
-        ctx.textAlign = 'center';
-        ctx.fillText(wildcardRankings[i], xOffset - 20, 60 + (i * 30));
-        ctx.font = '14pt GothicA1-Regular';
-        ctx.textAlign = 'left';
-        ctx.fillText(team.teamName.default, xOffset + 40, 60 + (i * 30));
-        ctx.textAlign = 'right';
-        ctx.font = '14pt GothicA1-Black';
-        ctx.fillText(
-          formatOdds(sportsClubStatsOdds[team.teamAbbrev.default]),
-          xOffset + 240,
-          60 + (i * 30),
-        );
-        ctx.fillText(
-          formatOdds(moneyPuckOdds[team.teamAbbrev.default]),
-          xOffset + 310,
-          60 + (i * 30),
-        );
-      });
+        return (a.divisionAbbrev > b.divisionAbbrev) ? 1 : -1;
+      }
+      return (a.wildcardSequence > b.wildcardSequence) ? 1 : -1;
+    })
+    .map(async (team, i) => {
+      const logo = await loadImage(`./src/assets/images/team_logos/${team.teamAbbrev.default}_light.png`);
+      ctx.drawImage(logo, xOffset, 40 + (i * 30), 30, 30);
 
-    // Western Conference
-    drawStandings('W', 60);
+      ctx.font = '10pt GothicA1-Regular';
+      ctx.textAlign = 'center';
+      ctx.fillText(wildcardRankings[i], xOffset - 20, 60 + (i * 30));
+      ctx.font = '10pt GothicA1-Regular';
+      ctx.textAlign = 'left';
+      ctx.fillText(team.teamName.default, xOffset + 40, 60 + (i * 30));
+      ctx.textAlign = 'right';
+      ctx.font = '10pt GothicA1-Black';
+      ctx.fillText(
+        formatOdds(sportsClubStatsOdds[team.teamAbbrev.default]),
+        xOffset + 240,
+        60 + (i * 30),
+      );
+      ctx.fillText(
+        formatOdds(moneyPuckOdds[team.teamAbbrev.default]),
+        xOffset + 310,
+        60 + (i * 30),
+      );
+    });
 
-    // Eastern Conference
-    drawStandings('E', 440);
+  // Western Conference
+  await drawStandings('W', 60);
 
-    // Updated
-    ctx.font = '8pt GothicA1-Regular';
-    ctx.textAlign = 'center';
-    ctx.fillText(`Updated: ${updatedAt}`, 400, 530);
+  // Eastern Conference
+  await drawStandings('E', 460);
 
-    // Return stream of data
-    logger.info('Encoding ...');
-    const pngData = [];
-    const passThroughStream = new PassThrough();
-    passThroughStream.on('data', (chunk) => pngData.push(chunk));
-    passThroughStream.on('end', () => {});
-    await PImage.encodePNGToStream(img, passThroughStream);
-    return Buffer.concat(pngData);
-  });
+  // Updated
+  ctx.font = '8pt GothicA1-Regular';
+  ctx.textAlign = 'center';
+  ctx.fillText(`Updated: ${updatedAt}`, 400, 530);
+
+  // Return stream of data
+  logger.info('Encoding ...');
+  return Buffer.from(canvas.toDataURL().replace('data:image/png;base64,', ''), 'base64');
 };
 
 const generateTeamPlayoffOddsImage = async ({
   team, sportsClubStatsOdds, moneyPuckOdds, updatedAt,
 }) => {
   // Canvas background
-  const backgroundStream = await fs.createReadStream('./src/assets/images/puck-bg.png');
+  const canvas = createCanvas(800, 540);
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, 800, 540);
 
-  // Team logo
-  const logo = await PImage.decodePNGFromStream(
-    await fs.createReadStream(`./src/assets/images/team_logos/${team.abbreviation}_light.png`),
-  );
+  ctx.antialias = 'subpixel';
+  ctx.filter = 'none';
 
-  // Draw
-  return PImage.decodePNGFromStream(backgroundStream).then(async (img) => {
-    GothicA1Black.loadSync();
-    GothicA1Regular.loadSync();
+  // Heading Background Box
+  ctx.fillStyle = team.teamColor || '#111111';
+  ctx.fillRect(40, 40, 720, 80);
 
-    const ctx = img.getContext('2d');
-    ctx.antialias = 'subpixel';
-    ctx.filter = 'none';
+  // Heading
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '18pt GothicA1-Black';
+  ctx.textAlign = 'center';
+  ctx.fillText((`Playoff odds for the ${team.name}`).toUpperCase(), 400, 90);
 
-    // Heading Background Box
-    ctx.fillStyle = team.teamColor || '#111111';
-    ctx.fillRect(40, 40, 720, 80);
+  // Team Logo
+  const logo = await loadImage(`./src/assets/images/team_logos/${team.abbreviation}_light.png`);
+  ctx.drawImage(logo, 360, 90, 400, 400);
 
-    // Heading
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = '26pt GothicA1-Black';
-    ctx.textAlign = 'center';
-    ctx.fillText((`Playoff odds for the ${team.name}`).toUpperCase(), 400, 90);
+  let currentYPosition = 190;
 
-    // Team Logo
-    ctx.drawImage(logo, 360, 90, 400, 400);
+  // MoneyPuck
+  if (moneyPuckOdds) {
+    ctx.fillStyle = '#000080';
+    ctx.font = '24pt GothicA1-Black';
+    ctx.fillText('MoneyPuck', 230, currentYPosition);
 
-    let currentYPosition = 190;
+    ctx.fillStyle = '#800000';
+    ctx.font = '48pt GothicA1-Black';
+    ctx.fillText(formatOdds(moneyPuckOdds), 230, currentYPosition + 70);
+    currentYPosition = 330;
+  }
 
-    // MoneyPuck
-    if (moneyPuckOdds) {
-      ctx.fillStyle = '#000080';
-      ctx.font = '30pt GothicA1-Black';
-      ctx.fillText('MoneyPuck', 230, currentYPosition);
+  // Sports Club Stats
+  if (sportsClubStatsOdds) {
+    ctx.fillStyle = '#000080';
+    ctx.font = '24pt GothicA1-Black';
+    ctx.fillText('Sports Club Stats', 230, currentYPosition);
 
-      ctx.fillStyle = '#800000';
-      ctx.font = '60pt GothicA1-Black';
-      ctx.fillText(formatOdds(moneyPuckOdds), 230, currentYPosition + 70);
-      currentYPosition = 330;
-    }
+    ctx.fillStyle = '#800000';
+    ctx.font = '48pt GothicA1-Black';
+    ctx.fillText(formatOdds(sportsClubStatsOdds), 230, currentYPosition + 70);
+  }
 
-    // Sports Club Stats
-    if (sportsClubStatsOdds) {
-      ctx.fillStyle = '#000080';
-      ctx.font = '30pt GothicA1-Black';
-      ctx.fillText('Sports Club Stats', 230, currentYPosition);
+  // Divider
+  ctx.fillStyle = team.teamColor || '#111111';
+  ctx.fillRect(40, 480, 720, 2);
 
-      ctx.fillStyle = '#800000';
-      ctx.font = '60pt GothicA1-Black';
-      ctx.fillText(formatOdds(sportsClubStatsOdds), 230, currentYPosition + 70);
-    }
+  // Credit
+  ctx.fillStyle = '#999999';
+  ctx.font = '16pt GothicA1-Regular';
+  ctx.textAlign = 'left';
+  ctx.fillText(attributionLine, 50, 510);
 
-    // Divider
-    ctx.fillStyle = team.teamColor || '#111111';
-    ctx.fillRect(40, 480, 720, 2);
+  // Timestamp
+  ctx.fillStyle = '#999999';
+  ctx.font = '16pt GothicA1-Regular';
+  ctx.textAlign = 'right';
+  ctx.fillText(`Updated ${updatedAt}`, 750, 510);
 
-    // Credit
-    ctx.fillStyle = '#999999';
-    ctx.font = '16pt GothicA1-Regular';
-    ctx.textAlign = 'left';
-    ctx.fillText(attributionLine, 50, 510);
-
-    // Timestamp
-    ctx.fillStyle = '#999999';
-    ctx.font = '16pt GothicA1-Regular';
-    ctx.textAlign = 'right';
-    ctx.fillText(`Updated ${updatedAt}`, 750, 510);
-
-    // Return stream of data
-    logger.info('Encoding ...');
-    const pngData = [];
-    const passThroughStream = new PassThrough();
-    passThroughStream.on('data', (chunk) => pngData.push(chunk));
-    passThroughStream.on('end', () => {});
-    await PImage.encodePNGToStream(img, passThroughStream);
-    return Buffer.concat(pngData);
-  });
+  // Return stream of data
+  logger.info('Encoding ...');
+  return Buffer.from(canvas.toDataURL().replace('data:image/png;base64,', ''), 'base64');
 };
 
 export {
