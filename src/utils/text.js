@@ -1,7 +1,12 @@
 export const formatOdds = (odds) => {
   // It's practically 100
-  if (odds > 99.99) {
+  if (odds >= 99.995) {
     return '100% ✓';
+  }
+
+  // It's practically 0
+  if (odds <= 0.001) {
+    return '0% ×';
   }
 
   return `${Intl.NumberFormat(

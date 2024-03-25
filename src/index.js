@@ -210,10 +210,10 @@ const postTeamOdds = async ({ teamCode, thread }) => {
   const image = await generateTeamPlayoffOddsImage({
     team,
     sportsClubStatsOdds: showSportsClubStatsOdds
-      ? sportsClubStatsOdds[team.abbreviation]
+      ? sportsClubStatsOdds[team.abbreviation] || 0.001
       : false,
     moneyPuckOdds: showMoneyPuckOdds
-      ? moneyPuckOdds[team.abbreviation]
+      ? moneyPuckOdds[team.abbreviation] || 0.001
       : false,
     updatedAt,
   });

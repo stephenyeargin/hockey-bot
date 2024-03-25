@@ -20,14 +20,21 @@ registerFont(
   },
 );
 
+/**
+ * Generate Team Playoff Odds Image
+ * @param {object} parameter.standings
+ * @param {object} parameter.sportsClubStatsOdds
+ * @param {object} parameter.moneyPuckOdds
+ * @param {string} parameter.updatedAt
+ * @returns Buffer
+ */
 const generateLeaguePlayoffOddsImage = async ({
   standings, sportsClubStatsOdds, moneyPuckOdds, updatedAt,
 }) => {
-  // Canvas background
-  const canvas = createCanvas(800, 540);
+  const canvas = createCanvas(800, 560);
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(0, 0, 800, 540);
+  ctx.fillRect(0, 0, 800, 560);
 
   const wildcardRankings = ['1', '2', '3', '1', '2', '3', 'WC1', 'WC2', '', '', '', '', '', '', '', ''];
 
@@ -48,7 +55,13 @@ const generateLeaguePlayoffOddsImage = async ({
   ctx.fillText('SCS', 680, 30);
   ctx.fillText('MP', 740, 30);
 
-  const drawStandings = async (conferenceAbbrev, xOffset) => standings
+  /**
+   * Draw Conference Standings
+   * @param {string} conferenceAbbrev Single letter for conference
+   * @param {integer} xOffset X position for drawing
+   * @returns void
+   */
+  const drawConferenceStandings = async (conferenceAbbrev, xOffset) => standings
     .filter((t) => t.conferenceAbbrev === conferenceAbbrev)
     .sort((a, b) => {
       if (a.wildcardSequence === b.wildcardSequence) {
@@ -84,25 +97,33 @@ const generateLeaguePlayoffOddsImage = async ({
     });
 
   // Western Conference
-  await drawStandings('W', 60);
+  await drawConferenceStandings('W', 60);
 
   // Eastern Conference
-  await drawStandings('E', 460);
+  await drawConferenceStandings('E', 460);
 
-  // Updated
+  // Credit + timestamp
+  ctx.fillStyle = '#999999';
   ctx.font = '8pt GothicA1-Regular';
   ctx.textAlign = 'center';
-  ctx.fillText(`${attributionLine} • Updated: ${updatedAt}`, 400, 530);
+  ctx.fillText(`${attributionLine} • Updated: ${updatedAt}`, 400, 540);
 
   // Return stream of data
   logger.info('Encoding ...');
   return Buffer.from(canvas.toDataURL().replace('data:image/png;base64,', ''), 'base64');
 };
 
+/**
+ * Generate Team Playoff Odds Image
+ * @param {object} parameter.team
+ * @param {object} parameter.sportsClubStatsOdds
+ * @param {object} parameter.moneyPuckOdds
+ * @param {string} parameter.updatedAt
+ * @returns Buffer
+ */
 const generateTeamPlayoffOddsImage = async ({
   team, sportsClubStatsOdds, moneyPuckOdds, updatedAt,
 }) => {
-  // Canvas background
   const canvas = createCanvas(800, 540);
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#FFFFFF';
