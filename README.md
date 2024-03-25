@@ -10,9 +10,11 @@ Posts the latest playoff odds for the configured team to Mastodon.
 * Redis server
 * [Mastodon API Key](https://docs.joinmastodon.org/client/intro/)
 
+May also have [additional requirements for `canvas`](https://github.com/Automattic/node-canvas/blob/master/Readme.md), depending on the operating system.
+
 ## Configuration
 
-Copy the `.env` file to `.env.local` (or `.env.production`) and update with the values below.
+These values must be set in the running process's environment. You can use a tool like [`dotenv`](https://github.com/motdotla/dotenv) or the newer [`dotenvx`](https://dotenvx.com/).
 
 | Environment Variable | Required? | Description | Example |
 | -------------------- | --------- | ----------- | ------- |
@@ -21,17 +23,21 @@ Copy the `.env` file to `.env.local` (or `.env.production`) and update with the 
 | `MASTODON_BASE_URL`  | Yes       | Base URL of the Mastodon server | `https://mastodon.social` |
 | `MASTODON_TOKEN`     | Yes       | API token for your bot | `someratherlong_apitoken123` |
 
-[^1]: If you leave this blank, it will generate posts for all teams with greater than a 0.01% chance.
+[^1]: If set, it will skip the league-wide post. If not set or empty, it will generate posts for all teams with greater than a 0.01% chance.
 
 ## Running
 
 The bot is designed to be run on a regular schedule (likely no more than hourly) via `cron` or similar service.
 
 ```
-0 * * * * cd your/path && npm run start
+0 * * * * cd your/path && dotenv --file .env.development run -- npm start
 ```
 
-## Other Commands
+## Commands
+
+### `npm start`
+
+Runs the application
 
 ### `npm run start:dev`
 
