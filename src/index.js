@@ -257,7 +257,10 @@ const postTeamOdds = async ({ teamCode, thread }) => {
 };
 
 // Post odds for league
-const thread = await postLeagueOdds();
+let thread = {};
+if (!TEAM_CODE) {
+  thread = await postLeagueOdds();
+}
 
 // Cache the league odds to avoid sending the same update again
 logger.info('Updating cache ...');
