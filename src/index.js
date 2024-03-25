@@ -9,7 +9,7 @@ import getRedisClient from './utils/redis.js';
 import logger from './utils/logger.js';
 import MoneyPuck from './moneypuck.js';
 import SportsClubStats from './sportsclubstats.js';
-import { generateLeaguePlayoffOddsImage, generateTeamPlayoffOddsImage } from './utils/imageGenerator.js';
+import { generateLeaguePlayoffOddsImage, generateTeamPlayoffOddsImage } from './utils/image-generator.js';
 import { formatOdds } from './utils/text.js';
 import { postImageToMastodon, postMessageToMastodon } from './utils/mastodon.js';
 

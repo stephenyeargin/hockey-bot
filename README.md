@@ -2,7 +2,7 @@
 
 [![Node CI](https://github.com/stephenyeargin/hockey-bot/actions/workflows/nodejs.yml/badge.svg)](https://github.com/stephenyeargin/hockey-bot/actions/workflows/nodejs.yml) [![CodeQL](https://github.com/stephenyeargin/hockey-bot/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/stephenyeargin/hockey-bot/actions/workflows/codeql-analysis.yml)
 
-Posts the latest playoff odds for the configured team to Mastodon.
+Posts the latest playoff odds for NHL teams to Mastodon.
 
 ## Requirements
 
