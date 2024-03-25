@@ -92,7 +92,7 @@ const generateLeaguePlayoffOddsImage = async ({
   // Updated
   ctx.font = '8pt GothicA1-Regular';
   ctx.textAlign = 'center';
-  ctx.fillText(`Updated: ${updatedAt}`, 400, 530);
+  ctx.fillText(`${attributionLine} • Updated: ${updatedAt}`, 400, 530);
 
   // Return stream of data
   logger.info('Encoding ...');
