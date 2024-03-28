@@ -1,6 +1,6 @@
 {
   "name": "hockey-bot",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Gets latest playoff odds and posts to Mastodon",
   "main": "src/index.js",
   "scripts": {
