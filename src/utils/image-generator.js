@@ -31,10 +31,10 @@ registerFont(
 const generateLeaguePlayoffOddsImage = async ({
   standings, sportsClubStatsOdds, moneyPuckOdds, updatedAt,
 }) => {
-  const canvas = createCanvas(800, 560);
+  const canvas = createCanvas(810, 560);
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(0, 0, 800, 560);
+  ctx.fillRect(0, 0, 810, 560);
 
   const wildcardRankings = ['1', '2', '3', '1', '2', '3', 'WC1', 'WC2', '', '', '', '', '', '', '', ''];
 
@@ -47,13 +47,13 @@ const generateLeaguePlayoffOddsImage = async ({
   ctx.textAlign = 'left';
   ctx.fillText('Western Conference', 60, 30);
   ctx.textAlign = 'center';
-  ctx.fillText('SCS', 280, 30);
-  ctx.fillText('MP', 340, 30);
+  ctx.fillText('SCS', 285, 30);
+  ctx.fillText('MP', 350, 30);
   ctx.textAlign = 'left';
   ctx.fillText('Eastern Conference', 460, 30);
   ctx.textAlign = 'center';
-  ctx.fillText('SCS', 680, 30);
-  ctx.fillText('MP', 740, 30);
+  ctx.fillText('SCS', 685, 30);
+  ctx.fillText('MP', 750, 30);
 
   /**
    * Draw Conference Standings
@@ -61,40 +61,79 @@ const generateLeaguePlayoffOddsImage = async ({
    * @param {integer} xOffset X position for drawing
    * @returns void
    */
-  const drawConferenceStandings = async (conferenceAbbrev, xOffset) => standings
-    .filter((t) => t.conferenceAbbrev === conferenceAbbrev)
-    .sort((a, b) => {
-      if (a.wildcardSequence === b.wildcardSequence) {
-        if (a.divisionAbbrev === b.divisionAbbrev) {
-          return (a.divisionSequence > b.divisionSequence) ? 1 : -1;
+  const drawConferenceStandings = async (conferenceAbbrev, xOffset) => {
+    standings
+      .filter((t) => t.conferenceAbbrev === conferenceAbbrev)
+      .sort((a, b) => {
+        if (a.wildcardSequence === b.wildcardSequence) {
+          if (a.divisionAbbrev === b.divisionAbbrev) {
+            return (a.divisionSequence > b.divisionSequence) ? 1 : -1;
+          }
+          return (a.divisionAbbrev > b.divisionAbbrev) ? 1 : -1;
         }
-        return (a.divisionAbbrev > b.divisionAbbrev) ? 1 : -1;
-      }
-      return (a.wildcardSequence > b.wildcardSequence) ? 1 : -1;
-    })
-    .map(async (team, i) => {
-      const logo = await loadImage(`./src/assets/images/team_logos/${team.teamAbbrev.default}_light.png`);
-      ctx.drawImage(logo, xOffset, 40 + (i * 30), 30, 30);
+        return (a.wildcardSequence > b.wildcardSequence) ? 1 : -1;
+      })
+      .map(async (team, i) => {
+        const logo = await loadImage(`./src/assets/images/team_logos/${team.teamAbbrev.default}_light.png`);
+        ctx.drawImage(logo, xOffset, 40 + (i * 30), 30, 30);
 
-      ctx.font = '10pt GothicA1-Regular';
-      ctx.textAlign = 'center';
-      ctx.fillText(wildcardRankings[i], xOffset - 20, 60 + (i * 30));
-      ctx.font = '10pt GothicA1-Regular';
-      ctx.textAlign = 'left';
-      ctx.fillText(team.teamName.default, xOffset + 40, 60 + (i * 30));
-      ctx.textAlign = 'right';
-      ctx.font = '10pt GothicA1-Black';
-      ctx.fillText(
-        formatOdds(sportsClubStatsOdds[team.teamAbbrev.default]),
-        xOffset + 240,
-        60 + (i * 30),
-      );
-      ctx.fillText(
-        formatOdds(moneyPuckOdds[team.teamAbbrev.default]),
-        xOffset + 310,
-        60 + (i * 30),
-      );
-    });
+        ctx.font = '10pt GothicA1-Regular';
+        ctx.textAlign = 'center';
+        ctx.fillText(wildcardRankings[i], xOffset - 20, 60 + (i * 30));
+        ctx.font = '10pt GothicA1-Regular';
+        ctx.textAlign = 'left';
+        const teamName = team.clinchIndicator ? `${team.teamName.default} (${team.clinchIndicator})` : team.teamName.default;
+        ctx.fillText(teamName, xOffset + 35, 60 + (i * 30));
+        ctx.textAlign = 'right';
+        ctx.font = '10pt GothicA1-Black';
+        ctx.fillText(
+          formatOdds(sportsClubStatsOdds[team.teamAbbrev.default]),
+          xOffset + 250,
+          60 + (i * 30),
+        );
+        ctx.fillText(
+          formatOdds(moneyPuckOdds[team.teamAbbrev.default]),
+          xOffset + 320,
+          60 + (i * 30),
+        );
+
+        // Row Divider
+        ctx.beginPath();
+        ctx.lineWidth = 0.25;
+        ctx.setLineDash([1, 1]);
+        ctx.strokeStyle = '#999999';
+        ctx.moveTo(xOffset, 70 + (i * 30));
+        ctx.lineTo(xOffset + 330, 70 + (i * 30));
+        ctx.stroke();
+      });
+
+    // Division Divider
+    ctx.beginPath();
+    ctx.lineWidth = 0.25;
+    ctx.setLineDash([1, 1]);
+    ctx.strokeStyle = '#111111';
+    ctx.moveTo(xOffset - 40, 130);
+    ctx.lineTo(xOffset + 330, 130);
+    ctx.stroke();
+
+    // Wildcard Divider
+    ctx.beginPath();
+    ctx.lineWidth = 0.25;
+    ctx.setLineDash([1, 1]);
+    ctx.strokeStyle = '#111111';
+    ctx.moveTo(xOffset - 40, 220);
+    ctx.lineTo(xOffset + 330, 220);
+    ctx.stroke();
+
+    // Cut-off Divider
+    ctx.beginPath();
+    ctx.lineWidth = 0.25;
+    ctx.setLineDash([1, 1]);
+    ctx.strokeStyle = '#111111';
+    ctx.moveTo(xOffset - 40, 280);
+    ctx.lineTo(xOffset + 330, 280);
+    ctx.stroke();
+  };
 
   // Western Conference
   await drawConferenceStandings('W', 60);
