@@ -2,6 +2,7 @@ import { createCanvas, loadImage, registerFont } from 'canvas';
 import logger from './logger.js';
 import { formatOdds } from './text.js';
 
+const SEASON_GAMES_COUNT = 82;
 const attributionLine = process.env.ATTRIBUTION_LINE || '@hockeybot@botsin.space';
 
 // Load fonts
@@ -56,6 +57,25 @@ const generateLeaguePlayoffOddsImage = async ({
   ctx.fillText('MP', 750, 30);
 
   /**
+   * Calculated if team is eliminated from playoffs
+   * @param {object} team Team object
+   * @param {string} conferenceAbbrev Single letter for conference
+   * @returns boolean
+   */
+  const isEliminated = (team, conferenceAbbrev) => {
+    const finalWildCardTeam = standings
+      .filter((t) => t.conferenceAbbrev === conferenceAbbrev)
+      .find((t) => t.wildcardSequence === 2);
+    const targetPoints = finalWildCardTeam.points;
+    const maxPoints = ((SEASON_GAMES_COUNT - team.gamesPlayed) * 2) + team.points;
+    // Not calculating tie breakers here
+    if (maxPoints < targetPoints) {
+      return true;
+    }
+    return false;
+  };
+
+  /**
    * Draw Conference Standings
    * @param {string} conferenceAbbrev Single letter for conference
    * @param {integer} xOffset X position for drawing
@@ -77,12 +97,17 @@ const generateLeaguePlayoffOddsImage = async ({
         const logo = await loadImage(`./src/assets/images/team_logos/${team.teamAbbrev.default}_light.png`);
         ctx.drawImage(logo, xOffset, 40 + (i * 30), 30, 30);
 
+        let { clinchIndicator } = team;
+        if (isEliminated(team, team.conferenceAbbrev)) {
+          clinchIndicator = 'e';
+        }
+
         ctx.font = '10pt GothicA1-Regular';
         ctx.textAlign = 'center';
         ctx.fillText(wildcardRankings[i], xOffset - 20, 60 + (i * 30));
         ctx.font = '10pt GothicA1-Regular';
         ctx.textAlign = 'left';
-        const teamName = team.clinchIndicator ? `${team.teamName.default} (${team.clinchIndicator})` : team.teamName.default;
+        const teamName = clinchIndicator ? `${team.teamName.default} (${clinchIndicator})` : team.teamName.default;
         ctx.fillText(teamName, xOffset + 35, 60 + (i * 30));
         ctx.textAlign = 'right';
         ctx.font = '10pt GothicA1-Black';
