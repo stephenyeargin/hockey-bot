@@ -112,7 +112,8 @@ const postLeagueOdds = async () => {
       return (a.wildcardSequence > b.wildcardSequence) ? 1 : -1;
     })
     .forEach((team) => {
-      description += `${team.teamName.default} | MP: ${formatOdds(moneyPuckOdds[team.teamAbbrev.default])}`;
+      const clinchIndicator = team.clinchIndicator ? ` (${team.clinchIndicator})` : '';
+      description += `${team.teamName.default}${clinchIndicator} | MP: ${formatOdds(moneyPuckOdds[team.teamAbbrev.default])}`;
       description += ` | SCS: ${formatOdds(sportsClubStatsOdds[team.teamAbbrev.default])}\n`;
     });
   description += `\nUpdated: ${updatedAt}`;

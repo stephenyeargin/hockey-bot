@@ -55,7 +55,19 @@ export const postImageToMastodon = ({ image, description }) => new Promise((reso
       logger.debug(response.data);
       resolve(response.data);
     })
-    .catch(reject);
+    .catch((error) => {
+      if (error.response) {
+        logger.error(error.response.data);
+        logger.error(error.response.status);
+        logger.error(error.response.headers);
+      } else if (error.request) {
+        logger.error(error.request);
+      } else {
+        logger.error('Error', error.message);
+      }
+      logger.error(error.config);
+      reject(error);
+    });
 });
 
 /**
@@ -89,5 +101,17 @@ export const postMessageToMastodon = ({
       logger.debug(response.data);
       resolve(response.data);
     })
-    .catch(reject);
+    .catch((error) => {
+      if (error.response) {
+        logger.error(error.response.data);
+        logger.error(error.response.status);
+        logger.error(error.response.headers);
+      } else if (error.request) {
+        logger.error(error.request);
+      } else {
+        logger.error('Error', error.message);
+      }
+      logger.error(error.config);
+      reject(error);
+    });
 });
