@@ -1,4 +1,9 @@
 export const formatOdds = (odds) => {
+  // Don't render if undefined
+  if (odds === undefined) {
+    return '';
+  }
+
   // It's practically 100
   if (odds >= 99.995) {
     return '100% ✓';

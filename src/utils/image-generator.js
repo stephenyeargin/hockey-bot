@@ -111,16 +111,20 @@ const generateLeaguePlayoffOddsImage = async ({
         ctx.fillText(teamName, xOffset + 35, 60 + (i * 30));
         ctx.textAlign = 'right';
         ctx.font = '10pt GothicA1-Black';
-        ctx.fillText(
-          formatOdds(sportsClubStatsOdds[team.teamAbbrev.default]),
-          xOffset + 250,
-          60 + (i * 30),
-        );
-        ctx.fillText(
-          formatOdds(moneyPuckOdds[team.teamAbbrev.default]),
-          xOffset + 320,
-          60 + (i * 30),
-        );
+        if (typeof sportsClubStatsOdds[team.teamAbbrev.default] !== 'undefined') {
+          ctx.fillText(
+            formatOdds(sportsClubStatsOdds[team.teamAbbrev.default]),
+            xOffset + 250,
+            60 + (i * 30),
+          );
+        }
+        if (typeof moneyPuckOdds[team.teamAbbrev.default] !== 'undefined') {
+          ctx.fillText(
+            formatOdds(moneyPuckOdds[team.teamAbbrev.default]),
+            xOffset + 320,
+            60 + (i * 30),
+          );
+        }
 
         // Row Divider
         ctx.beginPath();

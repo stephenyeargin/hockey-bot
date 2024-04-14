@@ -26,7 +26,9 @@ const MoneyPuck = {
     });
     const leagueOdds = {};
     parsedData.forEach((row) => {
-      leagueOdds[row.teamCode] = row.madePlayoffs * 100;
+      if (row.scenerio === 'ALL') {
+        leagueOdds[row.teamCode] = row.madePlayoffs * 100;
+      }
     });
     return leagueOdds;
   },
