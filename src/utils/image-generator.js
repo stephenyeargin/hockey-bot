@@ -59,18 +59,22 @@ const generateLeaguePlayoffOddsImage = async ({
   /**
    * Calculated if team is eliminated from playoffs
    * @param {object} team Team object
-   * @param {string} conferenceAbbrev Single letter for conference
    * @returns boolean
    */
-  const isEliminated = (team, conferenceAbbrev) => {
-    const finalWildCardTeam = standings
-      .filter((t) => t.conferenceAbbrev === conferenceAbbrev)
-      .find((t) => t.wildcardSequence === 2);
-    const targetPoints = finalWildCardTeam.points;
+  const isEliminated = (team) => {
+    const lastWildcard = standings
+      .find((t) => t.conferenceAbbrev === team.conferenceAbbrev && t.wildcardSequence === 2) || {};
     const maxPoints = ((SEASON_GAMES_COUNT - team.gamesPlayed) * 2) + team.points;
-    // Not calculating tie breakers here
-    if (maxPoints < targetPoints) {
+    if (lastWildcard.points > maxPoints) {
       return true;
+    }
+    if (lastWildcard.points === maxPoints) {
+      if (team.regulationWins < lastWildcard.regulationWins) {
+        return true;
+      }
+      if (team.regulationPlusOtWins < lastWildcard.regulationPlusOtWins) {
+        return true;
+      }
     }
     return false;
   };
@@ -98,7 +102,7 @@ const generateLeaguePlayoffOddsImage = async ({
         ctx.drawImage(logo, xOffset, 40 + (i * 30), 30, 30);
 
         let { clinchIndicator } = team;
-        if (isEliminated(team, team.conferenceAbbrev)) {
+        if (isEliminated(team)) {
           clinchIndicator = 'e';
         }
 
