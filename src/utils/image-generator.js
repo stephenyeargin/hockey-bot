@@ -114,20 +114,48 @@ const generateLeaguePlayoffOddsImage = async ({
         const teamName = clinchIndicator ? `${team.teamName.default} (${clinchIndicator})` : team.teamName.default;
         ctx.fillText(teamName, xOffset + 35, 60 + (i * 30));
         ctx.textAlign = 'right';
-        ctx.font = '10pt GothicA1-Black';
-        if (typeof sportsClubStatsOdds[team.teamAbbrev.default] !== 'undefined') {
-          ctx.fillText(
-            formatOdds(sportsClubStatsOdds[team.teamAbbrev.default]),
-            xOffset + 250,
-            60 + (i * 30),
-          );
+
+        if (typeof clinchIndicator === 'undefined') {
+          ctx.font = '10pt GothicA1-Black';
+          if (typeof sportsClubStatsOdds[team.teamAbbrev.default] !== 'undefined') {
+            ctx.fillText(
+              formatOdds(sportsClubStatsOdds[team.teamAbbrev.default]),
+              xOffset + 250,
+              60 + (i * 30),
+            );
+          }
+          if (typeof moneyPuckOdds[team.teamAbbrev.default] !== 'undefined') {
+            ctx.fillText(
+              formatOdds(moneyPuckOdds[team.teamAbbrev.default]),
+              xOffset + 320,
+              60 + (i * 30),
+            );
+          }
         }
-        if (typeof moneyPuckOdds[team.teamAbbrev.default] !== 'undefined') {
-          ctx.fillText(
-            formatOdds(moneyPuckOdds[team.teamAbbrev.default]),
-            xOffset + 320,
-            60 + (i * 30),
-          );
+
+        // Eliminated
+        if (clinchIndicator === 'e') {
+          ctx.fillText('Eliminated', xOffset + 320, 60 + (i * 30));
+        }
+
+        // Clinched
+        if (clinchIndicator === 'x') {
+          ctx.fillText('Clinched Playoffs', xOffset + 320, 60 + (i * 30));
+        }
+
+        // President's Trophy
+        if (clinchIndicator === 'p') {
+          ctx.fillText('President\'s Trophy', xOffset + 320, 60 + (i * 30));
+        }
+
+        // Division Champion
+        if (clinchIndicator === 'y') {
+          ctx.fillText('Clinched Division', xOffset + 320, 60 + (i * 30));
+        }
+
+        // Conference Champion
+        if (clinchIndicator === 'z') {
+          ctx.fillText('Clinched Conference', xOffset + 320, 60 + (i * 30));
         }
 
         // Row Divider
