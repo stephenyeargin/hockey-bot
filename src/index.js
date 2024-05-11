@@ -56,14 +56,35 @@ if (process.argv.includes('--cache:clear')) {
   process.exit(0);
 }
 
+// Get cached odds
+const cachedLeagueOdds = await redisClient.get('hockey-bot-odds-league') || {};
+
 // Get latest odds
-const sportsClubStatsOdds = await SportsClubStats.getLeagueLiveOdds();
-const sportsClubStatsLastUpdate = await SportsClubStats.getLastUpdate();
-const moneyPuckOdds = await MoneyPuck.getLeagueLiveOdds();
-const moneyPuckLastUpdate = await MoneyPuck.getLastUpdate();
+let sportsClubStatsOdds;
+let sportsClubStatsLastUpdate;
+try {
+  sportsClubStatsOdds = await SportsClubStats.getLeagueLiveOdds();
+  sportsClubStatsLastUpdate = await SportsClubStats.getLastUpdate();
+} catch (e) {
+  logger.error('Could not retrieve Sports Club Stats live odds!');
+  logger.error(e);
+  sportsClubStatsOdds = cachedLeagueOdds.sportsClubStatsOdds || {};
+  sportsClubStatsLastUpdate = new Date(0);
+}
+
+let moneyPuckOdds;
+let moneyPuckLastUpdate;
+try {
+  moneyPuckOdds = await MoneyPuck.getLeagueLiveOdds();
+  moneyPuckLastUpdate = await MoneyPuck.getLastUpdate();
+} catch (e) {
+  logger.error('Could not retrieve MoneyPuck live odds!');
+  logger.error(e);
+  moneyPuckOdds = cachedLeagueOdds.moneyPuckOdds || {};
+  moneyPuckLastUpdate = new Date(0);
+}
 
 // Compare new odds to cached odds
-const cachedLeagueOdds = await redisClient.get('hockey-bot-odds-league');
 if (cachedLeagueOdds === JSON.stringify({ moneyPuckOdds, sportsClubStatsOdds })) {
   logger.info('Odds in cache match, no updates needed.');
   process.exit(0);
