@@ -15,7 +15,8 @@ const SportsClubStats = {
     const response = await axios.get(SPORTS_CLUB_STATS_DATA_FEED);
     const leagueOdds = {};
     response.data.data.forEach((history) => {
-      const teamCode = Teams.find((t) => history.label === t.name).abbreviation;
+      const teamCode = Teams.find((t) => history.label === t.name)?.abbreviation;
+      if (!teamCode) return;
       leagueOdds[teamCode] = history.data[history.data.length - 1];
     });
     return leagueOdds;

@@ -33,7 +33,6 @@ describe('MoneyPuck', () => {
     const odds = await MoneyPuck.getLeagueLiveOdds();
     expect(odds).toEqual({
       ANA: 0,
-      ARI: 0.13,
       BOS: 99.9,
       BUF: 3.25,
       CAR: 99.55000000000001,
@@ -60,6 +59,7 @@ describe('MoneyPuck', () => {
       STL: 9.21,
       TBL: 85.28999999999999,
       TOR: 99.22,
+      UTA: 0.13,
       VAN: 99.98,
       VGK: 89.88000000000001,
       WPG: 99.83,

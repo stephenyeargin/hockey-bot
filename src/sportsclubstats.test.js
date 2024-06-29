@@ -38,7 +38,6 @@ describe('SportsClubStats', () => {
     const odds = await SportsClubStats.getLeagueLiveOdds();
     expect(odds).toEqual({
       ANA: 0.0021,
-      ARI: 0.014,
       BOS: 99.97,
       BUF: 0.84,
       CAR: 99.64,
@@ -65,6 +64,7 @@ describe('SportsClubStats', () => {
       STL: 18.88,
       TBL: 74.35,
       TOR: 98.91,
+      UTA: 0.014,
       VAN: 99.99,
       VGK: 95.4,
       WPG: 99.97,
