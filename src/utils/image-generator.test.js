@@ -17,7 +17,7 @@ describe('Mastodon', () => {
       const standings = await JSON.parse(fs.readFileSync('./src/test/fixtures/standings.json', 'utf-8'));
       const sportsClubStatsOdds = {
         ANA: 0.0021,
-        ARI: 0.014,
+        UTA: 0.014,
         BOS: 99.97,
         BUF: 0.84,
         CAR: 99.64,
@@ -51,7 +51,7 @@ describe('Mastodon', () => {
       };
       const moneyPuckOdds = {
         ANA: 0,
-        ARI: 0.09,
+        UTA: 0.09,
         BOS: 99.82,
         BUF: 2.18,
         CAR: 99.24,

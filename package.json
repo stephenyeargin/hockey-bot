@@ -4,13 +4,14 @@
   "description": "Gets latest playoff odds and posts to Mastodon",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "start:dev": "LOG_LEVEL=debug node src/index.js | pino-pretty",
-    "lint": "eslint ./src",
-    "lint:fix": "eslint --fix ./src",
     "cache:clear": "LOG_LEVEL=debug node src/index.js --cache:clear | pino-pretty",
+    "lint:fix": "eslint --fix ./src",
+    "lint": "eslint ./src",
+    "prepare": "husky",
+    "start:dev": "LOG_LEVEL=debug node src/index.js | pino-pretty",
+    "start": "node src/index.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js ./src/ --detectOpenHandles",
-    "prepare": "husky"
+    "update:logo": "node src/utils/svg2png.js"
   },
   "type": "module",
   "author": "stephen@yearg.in",
@@ -23,6 +24,7 @@
     "dayjs": "^1.11.10",
     "form-data": "^4.0.0",
     "husky": "^9.0.11",
+    "node-fetch": "^3.3.2",
     "pino": "^8.19.0",
     "redis": "^4.6.13"
   },
@@ -40,9 +42,6 @@
   },
   "lint-staged": {
     "*.js": "eslint --cache --fix"
-  },
-  "jest": {
-    "globalSetup": "./src/test/global-setup.cjs"
   },
   "volta": {
     "node": "20.11.1"
