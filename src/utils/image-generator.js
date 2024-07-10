@@ -24,13 +24,12 @@ registerFont(
 /**
  * Generate Team Playoff Odds Image
  * @param {object} parameter.standings
- * @param {object} parameter.sportsClubStatsOdds
- * @param {object} parameter.moneyPuckOdds
+ * @param {object} parameter.odds
  * @param {string} parameter.updatedAt
  * @returns Buffer
  */
 const generateLeaguePlayoffOddsImage = async ({
-  standings, sportsClubStatsOdds, moneyPuckOdds, updatedAt,
+  standings, odds, updatedAt,
 }) => {
   const canvas = createCanvas(810, 560);
   const ctx = canvas.getContext('2d');
@@ -43,18 +42,22 @@ const generateLeaguePlayoffOddsImage = async ({
   ctx.filter = 'none';
   ctx.fillStyle = '#111111';
 
+  const oddsProviders = Object.keys(odds);
+
   // Data Source Headings
   ctx.font = '12pt GothicA1-Black';
   ctx.textAlign = 'left';
   ctx.fillText('Western Conference', 60, 30);
   ctx.textAlign = 'center';
-  ctx.fillText('SCS', 285, 30);
-  ctx.fillText('MP', 350, 30);
+  oddsProviders.forEach((provider, index) => {
+    ctx.fillText(provider, 350 - (index * 65), 30);
+  });
   ctx.textAlign = 'left';
   ctx.fillText('Eastern Conference', 460, 30);
   ctx.textAlign = 'center';
-  ctx.fillText('SCS', 685, 30);
-  ctx.fillText('MP', 750, 30);
+  oddsProviders.forEach((provider, index) => {
+    ctx.fillText(provider, 750 - (index * 65), 30);
+  });
 
   /**
    * Calculated if team is eliminated from playoffs
@@ -117,20 +120,16 @@ const generateLeaguePlayoffOddsImage = async ({
 
         if (typeof clinchIndicator === 'undefined') {
           ctx.font = '10pt GothicA1-Black';
-          if (typeof sportsClubStatsOdds[team.teamAbbrev.default] !== 'undefined') {
-            ctx.fillText(
-              formatOdds(sportsClubStatsOdds[team.teamAbbrev.default]),
-              xOffset + 250,
-              60 + (i * 30),
-            );
-          }
-          if (typeof moneyPuckOdds[team.teamAbbrev.default] !== 'undefined') {
-            ctx.fillText(
-              formatOdds(moneyPuckOdds[team.teamAbbrev.default]),
-              xOffset + 320,
-              60 + (i * 30),
-            );
-          }
+          Object.values(odds).forEach((provider, index) => {
+            const columnOffset = 320 - (index * 70);
+            if (typeof provider[team.teamAbbrev.default] !== 'undefined') {
+              ctx.fillText(
+                formatOdds(provider[team.teamAbbrev.default]),
+                xOffset + columnOffset,
+                60 + (i * 30),
+              );
+            }
+          });
         }
 
         // Eliminated
@@ -216,13 +215,12 @@ const generateLeaguePlayoffOddsImage = async ({
 /**
  * Generate Team Playoff Odds Image
  * @param {object} parameter.team
- * @param {object} parameter.sportsClubStatsOdds
- * @param {object} parameter.moneyPuckOdds
+ * @param {object} parameter.odds
  * @param {string} parameter.updatedAt
  * @returns Buffer
  */
 const generateTeamPlayoffOddsImage = async ({
-  team, sportsClubStatsOdds, moneyPuckOdds, updatedAt,
+  team, odds, updatedAt,
 }) => {
   const canvas = createCanvas(800, 540);
   const ctx = canvas.getContext('2d');
@@ -249,28 +247,18 @@ const generateTeamPlayoffOddsImage = async ({
 
   let currentYPosition = 190;
 
-  // MoneyPuck
-  if (moneyPuckOdds) {
+  const providerLabels = Object.keys(odds);
+  Object.values(odds).forEach((teamOdds, index) => {
+    currentYPosition = 190 + (140 * index);
+
     ctx.fillStyle = '#000080';
     ctx.font = '24pt GothicA1-Black';
-    ctx.fillText('MoneyPuck', 230, currentYPosition);
+    ctx.fillText(providerLabels[index], 230, currentYPosition);
 
     ctx.fillStyle = '#800000';
     ctx.font = '48pt GothicA1-Black';
-    ctx.fillText(formatOdds(moneyPuckOdds), 230, currentYPosition + 70);
-    currentYPosition = 330;
-  }
-
-  // Sports Club Stats
-  if (sportsClubStatsOdds) {
-    ctx.fillStyle = '#000080';
-    ctx.font = '24pt GothicA1-Black';
-    ctx.fillText('Sports Club Stats', 230, currentYPosition);
-
-    ctx.fillStyle = '#800000';
-    ctx.font = '48pt GothicA1-Black';
-    ctx.fillText(formatOdds(sportsClubStatsOdds), 230, currentYPosition + 70);
-  }
+    ctx.fillText(formatOdds(teamOdds), 230, currentYPosition + 70);
+  });
 
   // Divider
   ctx.fillStyle = team.teamColor || '#111111';

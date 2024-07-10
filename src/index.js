@@ -97,7 +97,7 @@ const updatedAt = dayjs(dayjs.max([
 ])).tz('America/New_York').format('MMMM D, YYYY h:mm A ET');
 
 // Get NHL standings
-const standings = await axios.get('https://api-web.nhle.com/v1/standings/now')
+const standings = await axios.get(`https://api-web.nhle.com/v1/standings/${dayjs().format('YYYY-MM-DD')}`)
   .then((response) => response.data.standings)
   .catch((error) => {
     logger.error('Could not retrieve league standings!');
@@ -108,15 +108,21 @@ const standings = await axios.get('https://api-web.nhle.com/v1/standings/now')
 /**
  * Post latest league odds to Mastodon.
  * @param {object} standings
- * @param {object} moneyPuckOdds
- * @param {object} sportsClubStatsOdds
+ * @param {object} odds
  */
 const postLeagueOdds = async () => {
+  if (standings.length === 0) {
+    logger.warn('No league standings available, skipping league odds');
+    return false;
+  }
+
   const image = await generateLeaguePlayoffOddsImage({
     teams: Teams,
     standings,
-    moneyPuckOdds,
-    sportsClubStatsOdds,
+    odds: {
+      MP: moneyPuckOdds,
+      // SCS: sportsClubStatsOdds,
+    },
     updatedAt,
   });
 
@@ -231,12 +237,10 @@ const postTeamOdds = async ({ teamCode, thread }) => {
   logger.info('Generating image ...');
   const image = await generateTeamPlayoffOddsImage({
     team,
-    sportsClubStatsOdds: showSportsClubStatsOdds
-      ? sportsClubStatsOdds[team.abbreviation] || 0.001
-      : false,
-    moneyPuckOdds: showMoneyPuckOdds
-      ? moneyPuckOdds[team.abbreviation] || 0.001
-      : false,
+    odds: {
+      MoneyPuck: moneyPuckOdds,
+      // 'Sports Club Stats': sportsClubStatsOdds,
+    },
     updatedAt,
   });
 
