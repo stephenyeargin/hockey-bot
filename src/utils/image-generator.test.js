@@ -86,8 +86,10 @@ describe('Mastodon', () => {
       const updatedAt = 'March 9, 2024 9:03 ET';
       const image = await generateLeaguePlayoffOddsImage({
         standings: standings.standings,
-        sportsClubStatsOdds,
-        moneyPuckOdds,
+        odds: {
+          SCS: sportsClubStatsOdds,
+          MP: moneyPuckOdds,
+        },
         updatedAt,
       });
       expect(image).toBeDefined();
@@ -111,8 +113,10 @@ describe('Mastodon', () => {
           abbreviation: 'NSH',
           teamColor: '#FFB81C',
         },
-        sportsClubStatsOdds,
-        moneyPuckOdds,
+        odds: {
+          'Sports Club Stats': sportsClubStatsOdds,
+          MoneyPuck: moneyPuckOdds,
+        },
         updatedAt,
       });
       expect(image).toBeDefined();
