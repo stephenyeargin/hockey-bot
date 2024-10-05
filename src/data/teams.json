@@ -6,12 +6,6 @@
     "teamColor": "#F47A38"
   },
   {
-    "name": "Utah Hockey Club",
-    "hashtag": "UtahHockeyClub",
-    "abbreviation": "UTA",
-    "teamColor": "#6CACE4"
-  },
-  {
     "name": "Boston Bruins",
     "hashtag": "NHLBruins",
     "abbreviation": "BOS",
@@ -19,7 +13,7 @@
   },
   {
     "name": "Buffalo Sabres",
-    "hashtag": "LetsGoBuffalo",
+    "hashtag": "SabreHood",
     "abbreviation": "BUF",
     "teamColor": "#002654"
   },
@@ -31,7 +25,7 @@
   },
   {
     "name": "Carolina Hurricanes",
-    "hashtag": "CauseChaos",
+    "hashtag": "RaiseUp",
     "abbreviation": "CAR",
     "teamColor": "#CC0000"
   },
@@ -97,7 +91,7 @@
   },
   {
     "name": "Nashville Predators",
-    "hashtag": "Preds",
+    "hashtag": "Smashville",
     "abbreviation": "NSH",
     "teamColor": "#FFB81C"
   },
@@ -145,7 +139,7 @@
   },
   {
     "name": "San Jose Sharks",
-    "hashtag": "SJSharks",
+    "hashtag": "TheFutureIsTeal",
     "abbreviation": "SJS",
     "teamColor": "#006D75"
   },
@@ -166,6 +160,12 @@
     "hashtag": "LeafsForever",
     "abbreviation": "TOR",
     "teamColor": "#00205B"
+  },
+  {
+    "name": "Utah Hockey Club",
+    "hashtag": "UtahHC",
+    "abbreviation": "UTA",
+    "teamColor": "#6CACE4"
   },
   {
     "name": "Vancouver Canucks",
