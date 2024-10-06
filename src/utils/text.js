@@ -4,6 +4,11 @@ export const formatOdds = (odds) => {
     return '';
   }
 
+  // If NaN, return as-is
+  if (Number.isNaN(odds)) {
+    return odds;
+  }
+
   // It's practically 100
   if (odds >= 99.995) {
     return '100% ✓';

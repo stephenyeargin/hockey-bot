@@ -8,7 +8,6 @@ import timezone from 'dayjs/plugin/timezone.js';
 import getRedisClient from './utils/redis.js';
 import logger from './utils/logger.js';
 import MoneyPuck from './moneypuck.js';
-import SportsClubStats from './sportsclubstats.js';
 import { generateLeaguePlayoffOddsImage, generateTeamPlayoffOddsImage } from './utils/image-generator.js';
 import { formatOdds } from './utils/text.js';
 import { postImageToMastodon, postMessageToMastodon } from './utils/mastodon.js';
@@ -59,19 +58,6 @@ if (process.argv.includes('--cache:clear')) {
 // Get cached odds
 const cachedLeagueOdds = await redisClient.get('hockey-bot-odds-league') || {};
 
-// Get latest odds
-let sportsClubStatsOdds;
-let sportsClubStatsLastUpdate;
-try {
-  sportsClubStatsOdds = await SportsClubStats.getLeagueLiveOdds();
-  sportsClubStatsLastUpdate = await SportsClubStats.getLastUpdate();
-} catch (e) {
-  logger.error('Could not retrieve Sports Club Stats live odds!');
-  logger.error(e);
-  sportsClubStatsOdds = cachedLeagueOdds.sportsClubStatsOdds || {};
-  sportsClubStatsLastUpdate = new Date(0);
-}
-
 let moneyPuckOdds;
 let moneyPuckLastUpdate;
 try {
@@ -85,14 +71,13 @@ try {
 }
 
 // Compare new odds to cached odds
-if (cachedLeagueOdds === JSON.stringify({ moneyPuckOdds, sportsClubStatsOdds })) {
+if (cachedLeagueOdds === JSON.stringify({ moneyPuckOdds })) {
   logger.info('Odds in cache match, no updates needed.');
   process.exit(0);
 }
 
 // Use latest timestamp
 const updatedAt = dayjs(dayjs.max([
-  sportsClubStatsLastUpdate,
   moneyPuckLastUpdate,
 ])).tz('America/New_York').format('MMMM D, YYYY h:mm A ET');
 
@@ -121,7 +106,6 @@ const postLeagueOdds = async () => {
     standings,
     odds: {
       MP: moneyPuckOdds,
-      // SCS: sportsClubStatsOdds,
     },
     updatedAt,
   });
@@ -141,13 +125,12 @@ const postLeagueOdds = async () => {
     .forEach((team) => {
       const clinchIndicator = team.clinchIndicator ? ` (${team.clinchIndicator})` : '';
       description += `${team.teamName.default}${clinchIndicator} | MP: ${formatOdds(moneyPuckOdds[team.teamAbbrev.default])}`;
-      description += ` | SCS: ${formatOdds(sportsClubStatsOdds[team.teamAbbrev.default])}\n`;
     });
   description += `\nUpdated: ${updatedAt}`;
 
   // Extract all hashtags from Teams as string (if odds > 0)
   const hashtags = Teams
-    .filter((t) => sportsClubStatsOdds[t.abbreviation] > 0 && moneyPuckOdds[t.abbreviation] > 0)
+    .filter((t) => moneyPuckOdds[t.abbreviation] > 0)
     .map((t) => `#${t.hashtag}`).join(' ');
 
   // Upload image
@@ -184,26 +167,18 @@ const postTeamOdds = async ({ teamCode, thread }) => {
 
   logger.info(`Posting odds for ${team.name} ...`);
 
-  // Sports Club Stats
-  logger.debug({
-    sportsClubStatsOdds: sportsClubStatsOdds[team.abbreviation],
-    sportsClubStatsLastUpdate,
-  });
-  const showSportsClubStatsOdds = dayjs().diff(sportsClubStatsLastUpdate, 'day') < 2;
-
   // MoneyPuck
   logger.debug({ moneyPuckOdds: moneyPuckOdds[team.abbreviation], moneyPuckLastUpdate });
   const showMoneyPuckOdds = dayjs().diff(moneyPuckLastUpdate, 'day') < 2;
 
   // Bail out if odds are too stale
-  if (!showSportsClubStatsOdds && !showMoneyPuckOdds) {
+  if (!showMoneyPuckOdds) {
     logger.error('No recent odds available.');
     return;
   }
 
   // Check if new odds match cached value
   const newOdds = JSON.stringify({
-    sportsClubStatsOdds: sportsClubStatsOdds[team.abbreviation],
     moneyPuckOdds: moneyPuckOdds[team.abbreviation],
   });
   logger.debug({ newOdds });
@@ -217,7 +192,7 @@ const postTeamOdds = async ({ teamCode, thread }) => {
   }
 
   // Don't rub it in
-  if (sportsClubStatsOdds[team.abbreviation] < 0.01 && moneyPuckOdds[team.abbreviation] < 0.01) {
+  if (moneyPuckOdds[team.abbreviation] < 0.01) {
     logger.info('Odds are zero.');
     return;
   }
@@ -226,9 +201,6 @@ const postTeamOdds = async ({ teamCode, thread }) => {
   let message = `Updated playoff chances for the ${team.name}:\n\n`;
   if (showMoneyPuckOdds) {
     message += `• MoneyPuck: ${formatOdds(moneyPuckOdds[team.abbreviation])}\n`;
-  }
-  if (showSportsClubStatsOdds) {
-    message += `• Sports Club Stats: ${formatOdds(sportsClubStatsOdds[team.abbreviation])}\n`;
   }
   message += `\n\n#NHL #${team.hashtag} #${team.abbreviation} #${team.name.replace(/(\s|\.)/g, '')}`;
   logger.debug(message);
@@ -239,7 +211,6 @@ const postTeamOdds = async ({ teamCode, thread }) => {
     team,
     odds: {
       MoneyPuck: moneyPuckOdds,
-      // 'Sports Club Stats': sportsClubStatsOdds,
     },
     updatedAt,
   });
@@ -290,7 +261,7 @@ if (!TEAM_CODE) {
 
 // Cache the league odds to avoid sending the same update again
 logger.info('Updating cache ...');
-await redisClient.set('hockey-bot-odds-league', JSON.stringify({ moneyPuckOdds, sportsClubStatsOdds }));
+await redisClient.set('hockey-bot-odds-league', JSON.stringify({ moneyPuckOdds }));
 logger.info('Cache updated.');
 
 // Update odds for each team

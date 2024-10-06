@@ -250,6 +250,9 @@ const generateTeamPlayoffOddsImage = async ({
   const providerLabels = Object.keys(odds);
   Object.values(odds).forEach((teamOdds, index) => {
     currentYPosition = 190 + (140 * index);
+    if (Object.keys(odds).length === 1) {
+      currentYPosition = 250;
+    }
 
     ctx.fillStyle = '#000080';
     ctx.font = '24pt GothicA1-Black';
@@ -257,7 +260,7 @@ const generateTeamPlayoffOddsImage = async ({
 
     ctx.fillStyle = '#800000';
     ctx.font = '48pt GothicA1-Black';
-    ctx.fillText(formatOdds(teamOdds), 230, currentYPosition + 70);
+    ctx.fillText(formatOdds(teamOdds[team.abbreviation]), 230, currentYPosition + 70);
   });
 
   // Divider
