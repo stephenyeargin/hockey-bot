@@ -68,7 +68,7 @@ describe('Mastodon', () => {
 
   describe('generateTeamPlayoffOddsImage', () => {
     it('should generate an image', async () => {
-      const moneyPuckOdds = 49.57;
+      const moneyPuckOdds = { NSH: 49.57 };
       const updatedAt = 'March 9, 2024 9:03 ET';
       const image = await generateTeamPlayoffOddsImage({
         team: {
