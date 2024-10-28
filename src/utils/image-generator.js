@@ -49,12 +49,14 @@ const generateLeaguePlayoffOddsImage = async ({
   ctx.textAlign = 'left';
   ctx.fillText('Western Conference', 60, 30);
   ctx.textAlign = 'center';
+  ctx.fillText('Pts.', 290, 30);
   oddsProviders.forEach((provider, index) => {
     ctx.fillText(provider, 350 - (index * 65), 30);
   });
   ctx.textAlign = 'left';
   ctx.fillText('Eastern Conference', 460, 30);
   ctx.textAlign = 'center';
+  ctx.fillText('Pts.', 690, 30);
   oddsProviders.forEach((provider, index) => {
     ctx.fillText(provider, 750 - (index * 65), 30);
   });
@@ -117,6 +119,7 @@ const generateLeaguePlayoffOddsImage = async ({
         const teamName = clinchIndicator ? `${team.teamName.default} (${clinchIndicator})` : team.teamName.default;
         ctx.fillText(teamName, xOffset + 35, 60 + (i * 30));
         ctx.textAlign = 'right';
+        ctx.fillText(team.points, xOffset + 240, 60 + (i * 30));
 
         if (typeof clinchIndicator === 'undefined') {
           ctx.font = '10pt GothicA1-Black';
