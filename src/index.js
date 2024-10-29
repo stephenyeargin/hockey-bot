@@ -90,6 +90,15 @@ const standings = await axios.get(`https://api-web.nhle.com/v1/standings/${dayjs
     process.exit(1);
   });
 
+Teams.map((team) => {
+  const teamStandings = standings.find((s) => s.teamAbbrev.default === team.abbreviation);
+  if (teamStandings) {
+    // eslint-disable-next-line no-param-reassign
+    team.standing = teamStandings;
+  }
+  return team;
+});
+
 /**
  * Post latest league odds to Mastodon.
  * @param {object} standings
@@ -182,7 +191,7 @@ const postTeamOdds = async ({ teamCode, thread }) => {
     moneyPuckOdds: moneyPuckOdds[team.abbreviation],
   });
   logger.debug({ newOdds });
-  const cachedOdds = await redisClient.get(`hockey-bot-odds-${team.abbreviation}`);
+  const cachedOdds = await redisClient.get(`hockey-bot-odds-${team.abbreviation}`) || '{}';
   logger.debug({ cachedOdds });
 
   // Exit if no change in odds
@@ -202,16 +211,15 @@ const postTeamOdds = async ({ teamCode, thread }) => {
   if (showMoneyPuckOdds) {
     message += `• MoneyPuck: ${formatOdds(moneyPuckOdds[team.abbreviation])}\n`;
   }
-  message += `\n\n#NHL #${team.hashtag} #${team.abbreviation} #${team.name.replace(/(\s|\.)/g, '')}`;
+  message += `\n\n#NHL  #${team.hashtag} #${team.abbreviation} #${team.name.replace(/(\s|\.)/g, '')}`;
   logger.debug(message);
 
   // Generating image
   logger.info('Generating image ...');
   const image = await generateTeamPlayoffOddsImage({
     team,
-    odds: {
-      MoneyPuck: moneyPuckOdds,
-    },
+    odds: moneyPuckOdds[team.abbreviation],
+    cachedOdds: JSON.parse(cachedOdds)?.moneyPuckOdds[team.abbreviation],
     updatedAt,
   });
 

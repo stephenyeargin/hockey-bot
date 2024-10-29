@@ -223,7 +223,7 @@ const generateLeaguePlayoffOddsImage = async ({
  * @returns Buffer
  */
 const generateTeamPlayoffOddsImage = async ({
-  team, odds, updatedAt,
+  team, odds, cachedOdds, updatedAt,
 }) => {
   const canvas = createCanvas(800, 540);
   const ctx = canvas.getContext('2d');
@@ -248,23 +248,27 @@ const generateTeamPlayoffOddsImage = async ({
   const logo = await loadImage(`./src/assets/images/team_logos/${team.abbreviation}_light.png`);
   ctx.drawImage(logo, 360, 90, 400, 400);
 
-  let currentYPosition = 190;
+  let currentYPosition = 250;
 
-  const providerLabels = Object.keys(odds);
-  Object.values(odds).forEach((teamOdds, index) => {
-    currentYPosition = 190 + (140 * index);
-    if (Object.keys(odds).length === 1) {
-      currentYPosition = 250;
-    }
+  ctx.fillStyle = '#000080';
+  ctx.font = '24pt GothicA1-Black';
+  ctx.fillText('MoneyPuck', 230, currentYPosition);
 
-    ctx.fillStyle = '#000080';
-    ctx.font = '24pt GothicA1-Black';
-    ctx.fillText(providerLabels[index], 230, currentYPosition);
+  ctx.fillStyle = '#800000';
+  ctx.font = '48pt GothicA1-Black';
+  ctx.fillText(formatOdds(odds), 230, currentYPosition + 70);
 
-    ctx.fillStyle = '#800000';
-    ctx.font = '48pt GothicA1-Black';
-    ctx.fillText(formatOdds(teamOdds[team.abbreviation]), 230, currentYPosition + 70);
-  });
+  if (typeof cachedOdds !== 'undefined' && odds !== cachedOdds) {
+    const change = odds - cachedOdds;
+    ctx.fillStyle = change > 0 ? '#22bb33' : '#bb2124';
+    ctx.font = '18pt GothicA1-Black';
+    ctx.fillText(`${change > 0 ? '⏶' : '⏷'} ${formatOdds(change)}`, 230, currentYPosition + 130);
+    currentYPosition += 50;
+  }
+
+  ctx.fillStyle = '#000000';
+  ctx.font = '12pt GothicA1-Regular';
+  ctx.fillText(`Record: ${team.standing.wins}-${team.standing.losses}-${team.standing.otLosses} • ${team.standing.points} points`, 400, 450);
 
   // Divider
   ctx.fillStyle = team.teamColor || '#111111';
